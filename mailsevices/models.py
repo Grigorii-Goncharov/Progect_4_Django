@@ -24,3 +24,22 @@ class Recipient(models.Model):
     def __str__(self):
         return f"{self.full_name} ({self.email})"
 
+
+class Message(models.Model):
+    mail_title = models.CharField(
+        max_length=255,
+        verbose_name="Тема письма",
+        help_text="Краткая тема электронного письма"
+    )
+    mail_body = models.TextField(
+        verbose_name="Тело письма",
+        help_text="Содержание письма"
+    )
+
+    class Meta:
+        verbose_name = "Сообщение"
+        verbose_name_plural = "Сообщения"
+
+    def __str__(self):
+        return self.mail_title
+
