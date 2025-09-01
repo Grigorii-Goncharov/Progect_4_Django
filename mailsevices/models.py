@@ -81,3 +81,40 @@ class Mailing(models.Model):
         return f"Рассылка {self.start_datetime} — {self.status}"
 
 
+class MailAttempt(models.Model):
+    STATUS_CHOICES = [
+        ('success', 'Успешно'),
+        ('failed', 'Не успешно'),
+    ]
+
+    attempt_datetime = models.DateTimeField(
+        auto_now_add=True,  # Автоматически устанавливается при создании
+        verbose_name="Дата и время попытки"
+    )
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        verbose_name="Статус попытки"
+    )
+    server_response = models.TextField(
+        blank=True, null=True,
+        verbose_name="Ответ почтового сервера",
+        help_text="Ответ от SMTP-сервера при отправке"
+    )
+    mailing = models.ForeignKey(
+        Mailing,
+        on_delete=models.CASCADE,
+        related_name='attempts',
+        verbose_name="Рассылка"
+    )
+
+    class Meta:
+        verbose_name = "Попытка рассылки"
+        verbose_name_plural = "Попытки рассылки"
+        ordering = ['-attempt_datetime']  # Сортировка по убыванию даты
+
+    def __str__(self):
+        return f"Попытка: {self.mailing} — {self.get_status_display()} ({self.attempt_datetime})"
+
+
+
