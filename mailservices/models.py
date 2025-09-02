@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 
 
 class Recipient(models.Model):
@@ -18,7 +18,7 @@ class Recipient(models.Model):
         help_text="Дополнительная информация о получателе",
     )
 
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Владелец")
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Владелец")
 
     class Meta:
         verbose_name = "Получатель рассылки"
@@ -38,7 +38,7 @@ class Message(models.Model):
         verbose_name="Тело письма", help_text="Содержание письма"
     )
 
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Владелец")
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Владелец")
 
     class Meta:
         verbose_name = "Сообщение"
@@ -68,7 +68,7 @@ class Mailing(models.Model):
     )
     recipients = models.ManyToManyField(Recipient, verbose_name="Получатели")
 
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Владелец")
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Владелец")
 
     class Meta:
         verbose_name = "Рассылка"
