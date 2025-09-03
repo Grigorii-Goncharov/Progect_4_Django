@@ -2,7 +2,7 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.urls import reverse_lazy
 
 from .forms import RecipientForm
@@ -46,6 +46,11 @@ class RecipientCreateView(CreateView):
     def form_valid(self, form):
         form.instance.owner = self.request.user
         return super().form_valid(form)
+
+class RecipientDetailView(DetailView):
+    model = Recipient
+    context_object_name = "recipient"
+    # pk_url_kwarg = "pk"
 
 
 class RecipientUpdateView(UpdateView):
