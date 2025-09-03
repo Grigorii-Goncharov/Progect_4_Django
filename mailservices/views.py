@@ -29,6 +29,7 @@ def home_view(request):
 
 # Recipient CRUD
 class RecipientListView(ListView):
+
     model = Recipient
     template_name = "mailservices/recipient_list.html"
     context_object_name = "recipients"
@@ -38,6 +39,7 @@ class RecipientListView(ListView):
 
 
 class RecipientCreateView(CreateView):
+    """Внесение записи клиента"""
     model = Recipient
     form_class = RecipientForm
     template_name = "mailservices/recipient_form.html"
@@ -48,12 +50,14 @@ class RecipientCreateView(CreateView):
         return super().form_valid(form)
 
 class RecipientDetailView(DetailView):
+    """Просмотр записи о клиенте"""
     model = Recipient
     context_object_name = "recipient"
     # pk_url_kwarg = "pk"
 
 
 class RecipientUpdateView(UpdateView):
+    """Обновление записи клиента"""
     model = Recipient
     fields = ["email", "full_name", "comment"]
     template_name = "mailservices/recipient_form.html"
