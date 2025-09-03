@@ -9,7 +9,7 @@
         <p class="card-text"><strong>ФИО:</strong> {{ recipient.full_name }}</p>
         <p class="card-text"><strong>Email:</strong> {{ recipient.email }}</p>
         <p class="card-text"><strong>Комментарий о клиенте:</strong> {{ recipient.comment }}</p>
-        <a href="{% url 'mailservices:home' %}" class="btn btn-outline-secondary">Назад к списку</a>
+        <a href="{% url 'mailservices:recipient_list' %}" class="btn btn-outline-secondary">Назад к списку</a>
     </div>
 </div>
 {% endblock %}

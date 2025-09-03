@@ -11,8 +11,8 @@ urlpatterns = [
     path("recipients/", views.RecipientListView.as_view(), name="recipient_list"),
     path("recipients/create/", views.RecipientCreateView.as_view(), name="recipient_create"),
     path("recipients/<int:pk>/detail/", views.RecipientDetailView.as_view(), name="recipient_detail"),
-    path("recipients/<int:pk>/edit/", views.RecipientUpdateView.as_view(), name="recipient_update"),
-    # path("recipients/<int:pk>/delete/", views.RecipientDeleteView.as_view(), name="recipient_delete"),
+    path("recipients/<int:pk>/edit/", views.RecipientUpdateView.as_view(), name="recipient_edit"),
+    path("recipients/<int:pk>/delete/", views.RecipientDeleteView.as_view(), name="recipient_confirm_delete"),
     # Message URLs
     path("messages/", views.MessageListView.as_view(), name="message_list"),
     # path("messages/create/", views.MessageCreateView.as_view(), name="message_create"),

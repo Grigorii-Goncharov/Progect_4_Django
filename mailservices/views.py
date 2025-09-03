@@ -43,7 +43,7 @@ class RecipientCreateView(CreateView):
     model = Recipient
     form_class = RecipientForm
     template_name = "mailservices/recipient_form.html"
-    success_url = reverse_lazy("mailservices:home")
+    success_url = reverse_lazy("mailservices:recipient_list")
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
@@ -61,13 +61,19 @@ class RecipientUpdateView(UpdateView):
     model = Recipient
     fields = ["email", "full_name", "comment"]
     template_name = "mailservices/recipient_form.html"
-    success_url = reverse_lazy("recipient_list")
+    success_url = reverse_lazy("mailservices:recipient_list")
+
+
+class RecipientlistView(ListView):
+    model = Recipient
+    context_object_name = "products"
+    template_name = "mailservices/home.html"
 
 
 class RecipientDeleteView(DeleteView):
     model = Recipient
     template_name = "mailservices/recipient_confirm_delete.html"
-    success_url = reverse_lazy("recipient_list")
+    success_url = reverse_lazy("mailservices:recipient_list")
 
 
 # Message CRUD
