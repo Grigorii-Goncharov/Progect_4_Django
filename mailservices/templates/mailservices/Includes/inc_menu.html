@@ -1,22 +1,41 @@
-<div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom box-shadow">
-    <!-- Логотип -->
-    <h5 class="my-0 me-md-auto fw-normal">Web Shop Django</h5>
+<!-- Навигация -->
+<nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'mailservices:home' %}">
+            <i class="fas fa-envelope me-1"></i> Рассылка
+        </a>
 
-    <!-- Навигация -->
-    <nav class="d-flex flex-nowrap gap-2 align-items-center w-100 justify-content-start">
-        <a class="btn btn-outline-primary" href="/">Каталог</a>
-        <a class="btn btn-outline-primary" href="/contacts/">Контакты</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'mailservices:mailing_list' %}">Рассылки</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'mailservices:message_list' %}">Сообщения</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'mailservices:recipient_list' %}">Получатели</a>
+                </li>
+            </ul>
 
-        {% if user.is_authenticated %}
-            <a class="btn btn-outline-primary" href="/product/create/">Добавить продукт</a>
-            <span class="text-muted small d-none d-md-inline">Привет, {{ user.email }}</span>
-            <a class="btn btn-outline-primary" href="{% url 'users:profile' %}">Мой рофиль</a>
-            <form method="post" action="{% url 'users:logout' %}" class="d-inline">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-outline-primary">Выход</button>
-            </form>
-        {% else %}
-            <a class="btn btn-outline-primary" href="{% url 'users:login' %}">Личный кабинет</a>
-        {% endif %}
-    </nav>
-</div>
+            <!-- Авторизация -->
+            <div class="d-flex">
+                {% if user.is_authenticated %}
+                    <div class="dropdown">
+                        <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle"></i> {{ user.username }}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> Профиль</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-sign-out-alt me-2"></i> Выйти</a></li>
+                        </ul>
+                    </div>
+                {% else %}
+                    <a href="#" class="btn btn-outline-light btn-sm me-2">Вход</a>
+                    <a href="#" class="btn btn-light btn-sm">Регистрация</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</nav>

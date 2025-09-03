@@ -1,23 +1,53 @@
-<!-- templates/mailing/home.html -->
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Главная — Рассылка</title>
-</head>
-<body>
-    <h1>Статистика рассылок</h1>
-    <ul>
-        <li><strong>Всего рассылок:</strong> {{ total_mailings }}</li>
-        <li><strong>Активных рассылок:</strong> {{ active_mailings }}</li>
-        <li><strong>Уникальных получателей:</strong> {{ unique_recipients }}</li>
-    </ul>
+<!-- templates/home.html -->
+{% extends "mailservices/base.html" %}
 
-    <h2>Меню</h2>
-    <ul>
-        <li><a href="{% url 'mailservices:recipient_list' %}">Получатели</a></li>
-        <li><a href="{% url 'mailservices:message_list' %}">Сообщения</a></li>
-        <li><a href="{% url 'mailservices:mailing_list' %}">Рассылки</a></li>
-    </ul>
-</body>
-</html>
+{% block title %}Главная — Рассылка{% endblock %}
+
+{% block content %}
+<div class="text-center my-5">
+    <h1 class="display-5 fw-bold">Добро пожаловать!</h1>
+    <p class="lead text-muted">Статистика вашей системы email-рассылок</p>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <h5><i class="fas fa-envelope me-2"></i> Всего рассылок</h5>
+                <p class="display-6 mb-0">{{ total_mailings }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <h5><i class="fas fa-play-circle me-2"></i> Активных</h5>
+                <p class="display-6 mb-0">{{ active_mailings }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <h5><i class="fas fa-users me-2"></i> Получателей</h5>
+                <p class="display-6 mb-0">{{ unique_recipients }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="text-center">
+    <h3>Быстрый доступ</h3>
+    <div class="btn-group" role="group">
+        <a href="{% url 'mailservices:recipient_list' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-users"></i> Получатели
+        </a>
+        <a href="{% url 'mailservices:message_list' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-comment"></i> Сообщения
+        </a>
+        <a href="{% url 'mailservices:mailing_list' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-paper-plane"></i> Рассылки
+        </a>
+    </div>
+</div>
+{% endblock %}
