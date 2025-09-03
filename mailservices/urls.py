@@ -1,26 +1,25 @@
+# urls.py
 from django.urls import path
-from django.views.decorators.cache import cache_page
+from . import views
+from .apps import MailsevicesConfig
 
-from mailservices.apps import MailsevicesConfig
+app_name = MailsevicesConfig.name
 
-# from .views import (
-#     HomeView,
-#     ContactsView,
-#     ProductDetailView,
-#     ProductsCreateView,
-#     ProductsDeleteView,
-#     ProductsUpdateView,
-#     ProductsByCategoryView,
-# )
-
-# app_name = MailsevicesConfig.name
-#
-# urlpatterns = [
-#     path("", HomeView.as_view(), name="home"),  # главная страница
-#     path("contacts/", ContactsView.as_view(), name="contacts"),
-#     path("product/<int:pk>/", cache_page(15)(ProductDetailView.as_view()), name="product"),
-#     path("product/create/", ProductsCreateView.as_view(), name="create"),
-#     path("product/update/<int:pk>/", ProductsUpdateView.as_view(), name="update"),
-#     path("product/delete/<int:pk>/", ProductsDeleteView.as_view(), name="delete"),
-#     path("category/<int:category_id>/",ProductsByCategoryView.as_view(),name="products_by_category",),
-# ]
+urlpatterns = [
+    path("", views.home_view, name="home"),
+    # Recipient URLs
+    path("recipients/", views.RecipientListView.as_view(), name="recipient_list"),
+    # path("recipients/create/", views.RecipientCreateView.as_view(), name="recipient_create"),
+    # path("recipients/<int:pk>/edit/", views.RecipientUpdateView.as_view(), name="recipient_update"),
+    # path("recipients/<int:pk>/delete/", views.RecipientDeleteView.as_view(), name="recipient_delete"),
+    # Message URLs
+    path("messages/", views.MessageListView.as_view(), name="message_list"),
+    # path("messages/create/", views.MessageCreateView.as_view(), name="message_create"),
+    # path("messages/<int:pk>/edit/", views.MessageUpdateView.as_view(), name="message_update"),
+    # path("messages/<int:pk>/delete/", views.MessageDeleteView.as_view(), name="message_delete"),
+    # Mailing URLs
+    path("mailings/", views.MailingListView.as_view(), name="mailing_list"),
+    # path("mailings/create/", views.MailingCreateView.as_view(), name="mailing_create"),
+    # path("mailings/<int:pk>/edit/", views.MailingUpdateView.as_view(), name="mailing_update"),
+    # path("mailings/<int:pk>/delete/", views.MailingDeleteView.as_view(), name="mailing_delete"),
+]

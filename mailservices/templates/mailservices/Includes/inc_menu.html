@@ -1,0 +1,22 @@
+<div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom box-shadow">
+    <!-- Логотип -->
+    <h5 class="my-0 me-md-auto fw-normal">Web Shop Django</h5>
+
+    <!-- Навигация -->
+    <nav class="d-flex flex-nowrap gap-2 align-items-center w-100 justify-content-start">
+        <a class="btn btn-outline-primary" href="/">Каталог</a>
+        <a class="btn btn-outline-primary" href="/contacts/">Контакты</a>
+
+        {% if user.is_authenticated %}
+            <a class="btn btn-outline-primary" href="/product/create/">Добавить продукт</a>
+            <span class="text-muted small d-none d-md-inline">Привет, {{ user.email }}</span>
+            <a class="btn btn-outline-primary" href="{% url 'users:profile' %}">Мой рофиль</a>
+            <form method="post" action="{% url 'users:logout' %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-primary">Выход</button>
+            </form>
+        {% else %}
+            <a class="btn btn-outline-primary" href="{% url 'users:login' %}">Личный кабинет</a>
+        {% endif %}
+    </nav>
+</div>

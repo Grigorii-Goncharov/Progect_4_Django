@@ -1,0 +1,23 @@
+<!-- templates/mailing/home.html -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Главная — Рассылка</title>
+</head>
+<body>
+    <h1>Статистика рассылок</h1>
+    <ul>
+        <li><strong>Всего рассылок:</strong> {{ total_mailings }}</li>
+        <li><strong>Активных рассылок:</strong> {{ active_mailings }}</li>
+        <li><strong>Уникальных получателей:</strong> {{ unique_recipients }}</li>
+    </ul>
+
+    <h2>Меню</h2>
+    <ul>
+        <li><a href="{% url 'mailservices:recipient_list' %}">Получатели</a></li>
+        <li><a href="{% url 'mailservices:message_list' %}">Сообщения</a></li>
+        <li><a href="{% url 'mailservices:mailing_list' %}">Рассылки</a></li>
+    </ul>
+</body>
+</html>
