@@ -4,11 +4,17 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
+
+from .forms import RecipientForm
 from .models import Mailing, Recipient, Message
+
 
 # Главная страница — отображение статистики
 # @login_required
 def home_view(request):
+    """ Отображение главное страницы количество всех рассылок, количество активных рассылок (со статусом
+    'Запущена') и количество уникальных получателей.
+    """
     total_mailings = Mailing.objects.filter(owner=request.user).count()
     active_mailings = Mailing.objects.filter(owner=request.user, status="started").count()
     unique_recipients = Recipient.objects.filter(owner=request.user).values('email').distinct().count()
@@ -24,7 +30,7 @@ def home_view(request):
 # Recipient CRUD
 class RecipientListView(ListView):
     model = Recipient
-    template_name = "mailing/recipient_list.html"
+    template_name = "mailservices/recipient_list.html"
     context_object_name = "recipients"
 
     def get_queryset(self):
@@ -33,9 +39,9 @@ class RecipientListView(ListView):
 
 class RecipientCreateView(CreateView):
     model = Recipient
-    fields = ["email", "full_name", "comment"]
-    template_name = "mailing/recipient_form.html"
-    success_url = reverse_lazy("recipient_list")
+    form_class = RecipientForm
+    template_name = "mailservices/recipient_form.html"
+    success_url = reverse_lazy("mailservices:home")
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
@@ -45,21 +51,20 @@ class RecipientCreateView(CreateView):
 class RecipientUpdateView(UpdateView):
     model = Recipient
     fields = ["email", "full_name", "comment"]
-    template_name = "mailing/recipient_form.html"
+    template_name = "mailservices/recipient_form.html"
     success_url = reverse_lazy("recipient_list")
 
 
 class RecipientDeleteView(DeleteView):
     model = Recipient
-    template_name = "mailing/recipient_confirm_delete.html"
+    template_name = "mailservices/recipient_confirm_delete.html"
     success_url = reverse_lazy("recipient_list")
-
 
 
 # Message CRUD
 class MessageListView(ListView):
     model = Message
-    template_name = "mailing/message_list.html"
+    template_name = "mailservices/message_list.html"
     context_object_name = "messages"
 
     def get_queryset(self):
@@ -69,7 +74,7 @@ class MessageListView(ListView):
 class MessageCreateView(CreateView):
     model = Message
     fields = ["mail_title", "mail_body"]
-    template_name = "mailing/message_form.html"
+    template_name = "mailservices/message_form.html"
     success_url = reverse_lazy("message_list")
 
     def form_valid(self, form):
@@ -80,21 +85,20 @@ class MessageCreateView(CreateView):
 class MessageUpdateView(UpdateView):
     model = Message
     fields = ["mail_title", "mail_body"]
-    template_name = "mailing/message_form.html"
+    template_name = "mailservices/message_form.html"
     success_url = reverse_lazy("message_list")
 
 
 class MessageDeleteView(DeleteView):
     model = Message
-    template_name = "mailing/message_confirm_delete.html"
+    template_name = "mailservices/message_confirm_delete.html"
     success_url = reverse_lazy("message_list")
-
 
 
 # Mailing CRUD
 class MailingListView(ListView):
     model = Mailing
-    template_name = "mailing/mailing_list.html"
+    template_name = "mailservices/mailing_list.html"
     context_object_name = "mailings"
 
     def get_queryset(self):
@@ -104,7 +108,7 @@ class MailingListView(ListView):
 class MailingCreateView(CreateView):
     model = Mailing
     fields = ["start_datetime", "end_datetime", "message", "recipients"]
-    template_name = "mailing/mailing_form.html"
+    template_name = "mailservices/mailing_form.html"
     success_url = reverse_lazy("mailing_list")
 
     def get_form(self, form_class=None):
@@ -122,7 +126,7 @@ class MailingCreateView(CreateView):
 class MailingUpdateView(UpdateView):
     model = Mailing
     fields = ["start_datetime", "end_datetime", "message", "recipients"]
-    template_name = "mailing/mailing_form.html"
+    template_name = "mailservices/mailing_form.html"
     success_url = reverse_lazy("mailing_list")
 
     def get_form(self, form_class=None):
@@ -134,5 +138,5 @@ class MailingUpdateView(UpdateView):
 
 class MailingDeleteView(DeleteView):
     model = Mailing
-    template_name = "mailing/mailing_confirm_delete.html"
+    template_name = "mailservices/mailing_confirm_delete.html"
     success_url = reverse_lazy("mailing_list")
