@@ -151,6 +151,7 @@ class MailingUpdateView(UpdateView):
         return form
 
 
+
 class MailingDeleteView(DeleteView):
     model = Mailing
     template_name = "mailservices/mailing_confirm_delete.html"
