@@ -65,12 +65,14 @@ class RecipientUpdateView(UpdateView):
 
 
 class RecipientlistView(ListView):
+    """Просмотр списка клиентов"""
     model = Recipient
     context_object_name = "products"
     template_name = "mailservices/home.html"
 
 
 class RecipientDeleteView(DeleteView):
+    """просмотр записи клиента"""
     model = Recipient
     template_name = "mailservices/recipient_confirm_delete.html"
     success_url = reverse_lazy("mailservices:recipient_list")
@@ -78,6 +80,7 @@ class RecipientDeleteView(DeleteView):
 
 # Message CRUD
 class MessageListView(ListView):
+    """просмотр всех сообщений"""
     model = Message
     template_name = "mailservices/message_list.html"
     context_object_name = "messages"
@@ -87,6 +90,7 @@ class MessageListView(ListView):
 
 
 class MessageCreateView(CreateView):
+    """Создание сообщения"""
     model = Message
     form_class = MessageForm
     template_name = "mailservices/message_form.html"
@@ -99,9 +103,9 @@ class MessageCreateView(CreateView):
 
 class MessageUpdateView(UpdateView):
     model = Message
-    fields = ["mail_title", "mail_body"]
+    form_class = MessageForm
     template_name = "mailservices/message_form.html"
-    success_url = reverse_lazy("message_list")
+    success_url = reverse_lazy("mailservices:message_list")
 
 
 class MessageDeleteView(DeleteView):
