@@ -34,7 +34,7 @@
           <td>
             <a href="#">Просмотр</a>
             <a href="#">Изменить</a>
-            <a href="#">Удалить</a>
+            <a href="{% url 'mailservices:mailing_confirm_delete' mailing.pk %}">Удалить</a>
           </td>
         </tr>
       {% endfor %}
