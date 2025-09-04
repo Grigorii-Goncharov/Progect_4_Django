@@ -22,7 +22,7 @@
           <td>
             <a href="#">Просмотр</a>
             <a href="{% url 'mailservices:message_edit' message.pk %}">Изменить</a>
-            <a href="#">Удалить</a>
+            <a href="{% url 'mailservices:message_confirm_delete' message.pk %}">Удалить</a>
           </td>
         </tr>
       {% endfor %}

@@ -111,7 +111,7 @@ class MessageUpdateView(UpdateView):
 class MessageDeleteView(DeleteView):
     model = Message
     template_name = "mailservices/message_confirm_delete.html"
-    success_url = reverse_lazy("message_list")
+    success_url = reverse_lazy("mailservices:message_list")
 
 
 # Mailing CRUD
