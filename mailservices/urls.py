@@ -16,6 +16,7 @@ urlpatterns = [
     # Message URLs
     path("messages/", views.MessageListView.as_view(), name="message_list"),
     path("messages/create/", views.MessageCreateView.as_view(), name="message_create"),
+    path("messages/<int:pk>/detail/", views.RecipientDetailView.as_view(), name="message_detail"),
     path("messages/<int:pk>/edit/", views.MessageUpdateView.as_view(), name="message_edit"),
     path("messages/<int:pk>/delete/", views.MessageDeleteView.as_view(), name="message_confirm_delete"),
     # Mailing URLs

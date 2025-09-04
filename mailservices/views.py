@@ -102,6 +102,7 @@ class MessageCreateView(CreateView):
 
 
 class MessageUpdateView(UpdateView):
+    """Обновление сообщения рассылки"""
     model = Message
     form_class = MessageForm
     template_name = "mailservices/message_form.html"
@@ -109,9 +110,16 @@ class MessageUpdateView(UpdateView):
 
 
 class MessageDeleteView(DeleteView):
+    """Удаление сообщения рассылки"""
     model = Message
     template_name = "mailservices/message_confirm_delete.html"
     success_url = reverse_lazy("mailservices:message_list")
+
+
+class MessageDetailView(DetailView):
+    """Просмотр Сообщения для рассылки"""
+    model = Message
+    context_object_name = "message"
 
 
 # Mailing CRUD

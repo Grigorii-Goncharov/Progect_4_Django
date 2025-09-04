@@ -20,7 +20,7 @@
           <td>{{ message.mail_body }}</td>
           <td>{{ message.comment|default:"—" }}</td>
           <td>
-            <a href="#">Просмотр</a>
+            <a href="{% url 'mailservices:message_detail' message.pk %}">Просмотр</a>
             <a href="{% url 'mailservices:message_edit' message.pk %}">Изменить</a>
             <a href="{% url 'mailservices:message_confirm_delete' message.pk %}">Удалить</a>
           </td>
