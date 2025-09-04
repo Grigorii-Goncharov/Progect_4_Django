@@ -176,4 +176,9 @@ class MailingDeleteView(DeleteView):
 class MailingDetailView(DetailView):
     """Просмотр рассылки"""
     model = Mailing
-    context_object_name = "message"
+    context_object_name = "mailing"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['message'] = self.object.message
+        return context
