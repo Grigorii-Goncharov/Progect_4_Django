@@ -124,6 +124,7 @@ class MessageDetailView(DetailView):
 
 # Mailing CRUD
 class MailingListView(ListView):
+    """Просмотр списка рассылок"""
     model = Mailing
     template_name = "mailservices/mailing_list.html"
     context_object_name = "mailings"
@@ -133,10 +134,11 @@ class MailingListView(ListView):
 
 
 class MailingCreateView(CreateView):
+    """Создание рассылки"""
     model = Mailing
     fields = ["start_datetime", "end_datetime", "message", "recipients"]
     template_name = "mailservices/mailing_form.html"
-    success_url = reverse_lazy("mailing_list")
+    success_url = reverse_lazy("mailservices:mailing_list")
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
@@ -151,10 +153,11 @@ class MailingCreateView(CreateView):
 
 
 class MailingUpdateView(UpdateView):
+    """обновление рассылки"""
     model = Mailing
     fields = ["start_datetime", "end_datetime", "message", "recipients"]
     template_name = "mailservices/mailing_form.html"
-    success_url = reverse_lazy("mailing_list")
+    success_url = reverse_lazy("mailservices:mailing_list")
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
@@ -164,6 +167,13 @@ class MailingUpdateView(UpdateView):
 
 
 class MailingDeleteView(DeleteView):
+    """Удаление рассылки"""
     model = Mailing
     template_name = "mailservices/mailing_confirm_delete.html"
-    success_url = reverse_lazy("mailing_list")
+    success_url = reverse_lazy("mailservices:mailing_list")
+
+
+class MailingDetailView(DetailView):
+    """Просмотр рассылки"""
+    model = Mailing
+    context_object_name = "message"
