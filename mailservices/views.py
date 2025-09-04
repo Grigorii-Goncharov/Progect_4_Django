@@ -155,7 +155,7 @@ class MailingCreateView(CreateView):
 class MailingUpdateView(UpdateView):
     """обновление рассылки"""
     model = Mailing
-    fields = ["start_datetime", "end_datetime", "message", "recipients"]
+    form_class = MailingForm
     template_name = "mailservices/mailing_form.html"
     success_url = reverse_lazy("mailservices:mailing_list")
 

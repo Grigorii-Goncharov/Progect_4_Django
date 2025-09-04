@@ -33,7 +33,7 @@
             {% endif %}
           <td>
             <a href="{% url 'mailservices:mailing_detail' mailing.pk %}">Просмотр</a>
-            <a href="#">Изменить</a>
+            <a href="{% url 'mailservices:mailing_edit' mailing.pk %}">Изменить</a>
             <a href="{% url 'mailservices:mailing_confirm_delete' mailing.pk %}">Удалить</a>
           </td>
         </tr>
