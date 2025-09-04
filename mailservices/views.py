@@ -5,7 +5,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.urls import reverse_lazy
 
-from .forms import RecipientForm
+from .forms import RecipientForm, MessageForm
 from .models import Mailing, Recipient, Message
 
 
@@ -88,9 +88,9 @@ class MessageListView(ListView):
 
 class MessageCreateView(CreateView):
     model = Message
-    fields = ["mail_title", "mail_body"]
+    form_class = MessageForm
     template_name = "mailservices/message_form.html"
-    success_url = reverse_lazy("message_list")
+    success_url = reverse_lazy("mailservices:message_list")
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
@@ -149,7 +149,6 @@ class MailingUpdateView(UpdateView):
         form.fields["message"].queryset = Message.objects.filter(owner=self.request.user)
         form.fields["recipients"].queryset = Recipient.objects.filter(owner=self.request.user)
         return form
-
 
 
 class MailingDeleteView(DeleteView):
