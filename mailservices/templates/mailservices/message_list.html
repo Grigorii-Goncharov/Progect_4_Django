@@ -11,6 +11,7 @@
       <tr>
         <th>Тема сообщения</th>
         <th>Содержание сообщения</th>
+        <th>Действия</th>
       </tr>
     </thead>
     <tbody>
@@ -18,7 +19,7 @@
         <tr>
           <td>{{ message.mail_title }}</td>
           <td>{{ message.mail_body }}</td>
-          <td>{{ message.comment|default:"—" }}</td>
+          <td>{{ message.comment}}</td>
           <td>
             <a href="{% url 'mailservices:message_detail' message.pk %}">Просмотр</a>
             <a href="{% url 'mailservices:message_edit' message.pk %}">Изменить</a>

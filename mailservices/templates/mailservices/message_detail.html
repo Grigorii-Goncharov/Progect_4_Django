@@ -7,7 +7,7 @@
     <div class="card-body text-center">
         <h4 class="card-title">Клиент</h4>
         <p class="card-text"><strong>Тема сообщения:</strong> {{ message.mail_title}}</p>
-        <p class="card-text"><strong>Содержаение сообщения:</strong> {{ message.mail_body }}</p>
+        <p class="card-text"><strong>Содержание сообщения:</strong> {{ message.mail_body }}</p>
          <p class="card-text"><strong>Автор сообщения:</strong> {{ message.owner }}</p>
         <a href="{% url 'mailservices:recipient_list' %}" class="btn btn-outline-secondary">Назад к списку</a>
     </div>
