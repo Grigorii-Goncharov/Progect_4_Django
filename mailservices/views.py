@@ -5,7 +5,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.urls import reverse_lazy
 
-from .forms import RecipientForm, MessageForm
+from .forms import RecipientForm, MessageForm, MailingForm
 from .models import Mailing, Recipient, Message
 
 
@@ -136,7 +136,7 @@ class MailingListView(ListView):
 class MailingCreateView(CreateView):
     """Создание рассылки"""
     model = Mailing
-    fields = ["start_datetime", "end_datetime", "message", "recipients"]
+    form_class = MailingForm
     template_name = "mailservices/mailing_form.html"
     success_url = reverse_lazy("mailservices:mailing_list")
 

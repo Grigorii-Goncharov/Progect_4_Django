@@ -3,7 +3,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from .bad_words import FORBIDDEN_WORDS
-from .models import Recipient, Message
+from .models import Recipient, Message, Mailing
 
 
 class RecipientForm(forms.ModelForm):
@@ -110,4 +110,34 @@ class MessageForm(forms.ModelForm):
                 raise ValidationError(f'Недопустимое слово: "{word}"!')
         return mail_body
 
+
+class MailingForm(forms.ModelForm):
+    class Meta:
+        model = Mailing
+        fields = ['start_datetime',
+                  'end_datetime',
+                  'message',
+                  'recipients'
+                  ]
+        widgets = {
+            'start_datetime': forms.DateTimeInput(attrs={'type': 'datetime-local'}, format='%Y-%m-%dT%H:%M'),
+            'end_datetime': forms.DateTimeInput(attrs={'type': 'datetime-local'}, format='%Y-%m-%dT%H:%M'),}
+
+    def __init__(self, *args, **kwargs):
+        super(MailingForm, self).__init__(*args, **kwargs)
+        self.fields['start_datetime'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Начало рассылки'})
+
+        self.fields['end_datetime'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Конец рассылки'})
+
+        self.fields['message'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Сообщение для рассылки'})
+
+        self.fields['recipients'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Получатели рассылки'})
 
