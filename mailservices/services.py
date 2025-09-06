@@ -11,7 +11,7 @@ def send_mailing(mailing):
     """
     Отправляет рассылку, проверяет время, обновляет статус.
     """
-    print("🔹" * 40)
+    print("*" * 40)
     print(f"   send_mailing вызвана для ID={mailing.pk}")
     print(f"   Текущий статус: {mailing.status}")
     print(f"   Время завершения рассылки: {mailing.end_datetime}")
@@ -110,4 +110,4 @@ def send_mailing(mailing):
         logger.info("  Время окончания ещё не наступило.")
 
     logger.info(f"=== ЗАВЕРШЕНО: Рассылка ID={mailing.pk} ===\n")
-    print("🔹" * 40)
+    print("*" * 40)
