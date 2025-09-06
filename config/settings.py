@@ -90,9 +90,9 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 
@@ -118,14 +118,14 @@ AUTH_USER_MODEL = 'users.User'  # ← указываем, что User — из �
 # LOGIN_URL = 'users:login'  # будет перенаправлено по ссылке LoginRequiredMixin
 #
 #
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend' #Настройки почты
-# EMAIL_HOST = 'smtp.yandex.ru'
-# EMAIL_PORT = 465
-# EMAIL_USE_TLS = False
-# EMAIL_USE_SSL = True
-# EMAIL_HOST_USER = os.getenv('MAIL_HOST')
-# EMAIL_HOST_PASSWORD = os.getenv('MAIL_PASSWORD')
-# DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend' #Настройки почты
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_PORT = 465
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
+EMAIL_HOST_USER = os.getenv('MAIL_HOST')
+EMAIL_HOST_PASSWORD = os.getenv('MAIL_PASSWORD')
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 # CACHES = {
@@ -134,3 +134,33 @@ AUTH_USER_MODEL = 'users.User'  # ← указываем, что User — из �
 #         'LOCATION': 'redis://127.0.0.1:6379/1',
 #     }
 # }
+
+
+# Настройка логгера:
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {name} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'mailservices': {  # ← имя вашего приложения
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}

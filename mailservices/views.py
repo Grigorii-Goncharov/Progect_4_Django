@@ -1,12 +1,16 @@
 # views.py
-from django.shortcuts import render
+from django.contrib import messages
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.utils import timezone
 from django.utils.decorators import method_decorator
+from django.views import View
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.urls import reverse_lazy
 
 from .forms import RecipientForm, MessageForm, MailingForm
 from .models import Mailing, Recipient, Message
+from .services import send_mailing
 
 
 # Главная страница — отображение статистики
@@ -130,7 +134,20 @@ class MailingListView(ListView):
     context_object_name = "mailings"
 
     def get_queryset(self):
+        # находим запись и если она есть  по времени завершения — автоматически завершаем просроченные рассылки
+        now = timezone.now()
+        Mailing.objects.filter(
+            owner=self.request.user,
+            status='started',
+            end_datetime__lt=now
+        ).update(status='completed')
+
         return Mailing.objects.filter(owner=self.request.user).select_related("message")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['now'] = timezone.now()
+        return context
 
 
 class MailingCreateView(CreateView):
@@ -182,3 +199,26 @@ class MailingDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         context['message'] = self.object.message
         return context
+
+
+class MailingNowView(View):
+    """
+    Вьюха для ручной отправки рассылки по кнопке.
+    Доступна только владельцу.
+    """
+
+    def post(self, request, pk):
+        mail_send = get_object_or_404(Mailing, pk=pk)
+
+        # Проверка владельца
+        if  mail_send.owner != request.user:
+            messages.error(request, "Вы не можете отправить чужую рассылку.")
+            return redirect('mailservices:mailing_list')
+
+        # Запускаем отправку
+        send_mailing(mail_send)
+
+        messages.success(request, f"Рассылка '{mail_send}' была обработана.")
+        return redirect('mailservices:mailing_list')
+
+

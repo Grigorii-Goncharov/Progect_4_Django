@@ -1,6 +1,6 @@
 {% extends "mailservices/base.html" %}
 
-{% block title %}Список gbctv{% endblock %}
+{% block title %}Список рассылок{% endblock %}
 
 {% block content %}
 <h2>Список рассылок</h2>
@@ -9,21 +9,22 @@
   <table class="table table-striped table-hover">
     <thead class="table-light">
       <tr>
-          <th>Дата и время начала отправки</th>
-          <th>Дата и время конца отправки</th>
-          <th>Статус рассылки</th>
-          <th>Сообщение для рассылки</th>
-          <th>Пользователи для рассылки</th>
+        <th>Дата начала</th>
+        <th>Дата окончания</th>
+        <th>Статус</th>
+        <th>Сообщение</th>
+        <th>Получатели</th>
+        <th>Действия</th>
       </tr>
     </thead>
     <tbody>
       {% for mailing in object_list %}
         <tr>
-            <td>{{ mailing.start_datetime }}</td>
-            <td>{{ mailing.end_datetime }}</td>
-            <td>{{ mailing.get_status_display }}</td>
-            <td>{{ mailing.message }}</td>
-            <td>
+          <td>{{ mailing.start_datetime }}</td>
+          <td>{{ mailing.end_datetime }}</td>
+          <td>{{ mailing.get_status_display }}</td>
+          <td>{{ mailing.message }}</td>
+          <td>
             {% if mailing.recipients.all %}
               {% for recipient in mailing.recipients.all %}
                 {{ recipient.full_name }}{% if not forloop.last %}, {% endif %}
@@ -31,7 +32,24 @@
             {% else %}
               <span class="text-muted">—</span>
             {% endif %}
+          </td>
           <td>
+            {% if mailing.status != 'completed' and mailing.end_datetime > now %}
+              <form method="post" action="{% url 'mailservices:send_mailing_now' mailing.pk %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-danger"
+                        onclick="return confirm('Отправить эту рассылку немедленно?')">
+                  Отправить сейчас
+                </button>
+              </form>
+            {% else %}
+              {% if sending.status == 'completed' %}
+                <span class="text-success">Завершена</span>
+              {% else %}
+                <span class="text-muted">Время истекло</span>
+              {% endif %}
+            {% endif %}
+
             <a href="{% url 'mailservices:mailing_detail' mailing.pk %}">Просмотр</a>
             <a href="{% url 'mailservices:mailing_edit' mailing.pk %}">Изменить</a>
             <a href="{% url 'mailservices:mailing_confirm_delete' mailing.pk %}">Удалить</a>
@@ -49,4 +67,3 @@
 </div>
 
 {% endblock %}
-
