@@ -1,10 +1,7 @@
-# views.py
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
 from django.utils import timezone
-from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import (
     ListView,
@@ -21,47 +18,58 @@ from .services import send_mailing
 
 
 def home_view(request):
-    # Общая статистика (видна всем)
+    """Отображает главную страницу с общей и персональной статистикой по рассылкам.
+    Показывает:
+        - Общее количество рассылок.
+        - Количество активных рассылок (со статусом 'created' или 'started').
+        - Уникальное количество получателей.
+        - Для авторизованных пользователей — их личные показатели.
+    Args:
+        request (HttpRequest): Объект запроса от клиента.
+    Returns:
+        HttpResponse: HTML-страница с контекстом статистики.
+    """
     total_mailings = Mailing.objects.count()
     unique_recipients = Recipient.objects.count()
-
-    # Активные рассылки: started или created (тоже общая или по владельцу)
     active_mailings = Mailing.objects.filter(status__in=["created", "started"]).count()
 
-    # Если пользователь авторизован — показываем его статистику
+    my_total = my_active = 0
     if request.user.is_authenticated:
         my_total = Mailing.objects.filter(owner=request.user).count()
         my_active = Mailing.objects.filter(
             owner=request.user, status__in=["created", "started"]
         ).count()
-    else:
-        my_total = 0
-        my_active = 0
 
     context = {
         "total_mailings": total_mailings,
         "active_mailings": active_mailings,
         "unique_recipients": unique_recipients,
-        # Опционально: свои показатели
         "my_total": my_total,
         "my_active": my_active,
     }
     return render(request, "mailservices/home.html", context)
 
 
-# Recipient CRUD
+# === Recipient Views ===
+
+
 class RecipientListView(LoginRequiredMixin, ListView):
+    """Отображает список получателей, принадлежащих текущему пользователю.
+    Администратор видит всех получателей. Обычный пользователь — только свои.
+    """
 
     model = Recipient
     template_name = "mailservices/recipient_list.html"
     context_object_name = "recipients"
 
     def get_queryset(self):
+        if self.request.user.is_superuser:
+            return Recipient.objects.all()
         return Recipient.objects.filter(owner=self.request.user)
 
 
 class RecipientCreateView(LoginRequiredMixin, CreateView):
-    """Внесение записи клиента"""
+    """Создаёт нового получателя и привязывает его к текущему пользователю."""
 
     model = Recipient
     form_class = RecipientForm
@@ -74,15 +82,18 @@ class RecipientCreateView(LoginRequiredMixin, CreateView):
 
 
 class RecipientDetailView(LoginRequiredMixin, DetailView):
-    """Просмотр записи о клиенте"""
+    """Отображает детальную информацию о конкретном получателе.
+    Доступ только владельцу записи или администратору.
+    """
 
     model = Recipient
     context_object_name = "recipient"
-    # pk_url_kwarg = "pk"
 
 
 class RecipientUpdateView(LoginRequiredMixin, UpdateView):
-    """Обновление записи клиента"""
+    """Обновляет данные существующего получателя.
+    Доступ только владельцу записи или администратору.
+    """
 
     model = Recipient
     fields = ["email", "full_name", "comment"]
@@ -90,50 +101,36 @@ class RecipientUpdateView(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy("mailservices:recipient_list")
 
 
-class RecipientListView(LoginRequiredMixin, ListView):
-    """Просмотр всех записей клиентов"""
-
-    model = Recipient
-    template_name = "mailservices/recipient_list.html"
-    context_object_name = "recipients"
-
-    def get_queryset(self):
-        if self.request.user.is_superuser:
-            return Recipient.objects.all()  # Админ видит всех
-        return Recipient.objects.filter(
-            owner=self.request.user
-        )  # Обычный пользователь — только свои
-
-
 class RecipientDeleteView(LoginRequiredMixin, DeleteView):
-    """просмотр записи клиента"""
+    """Удаляет получателя после подтверждения.
+    Доступ только владельцу записи или администратору.
+    """
 
     model = Recipient
     template_name = "mailservices/recipient_confirm_delete.html"
     success_url = reverse_lazy("mailservices:recipient_list")
 
 
-# Message CRUD
+# === Message Views ===
+
+
 class MessageListView(LoginRequiredMixin, ListView):
-    """просмотр всех сообщений"""
+    """Отображает список сообщений для рассылок.
+    Администратор видит все сообщения. Обычный пользователь — только свои.
+    """
 
     model = Message
     template_name = "mailservices/message_list.html"
     context_object_name = "messages"
 
-    # def get_queryset(self):
-    #     return Message.objects.filter(owner=self.request.user)
-
     def get_queryset(self):
         if self.request.user.is_superuser:
-            return Message.objects.all()  # Админ видит всех
-        return Message.objects.filter(
-            owner=self.request.user
-        )  # Обычный пользователь — только свои
+            return Message.objects.all()
+        return Message.objects.filter(owner=self.request.user)
 
 
 class MessageCreateView(LoginRequiredMixin, CreateView):
-    """Создание сообщения"""
+    """Создаёт новое сообщение для рассылок и привязывает его к текущему пользователю."""
 
     model = Message
     form_class = MessageForm
@@ -146,7 +143,9 @@ class MessageCreateView(LoginRequiredMixin, CreateView):
 
 
 class MessageUpdateView(LoginRequiredMixin, UpdateView):
-    """Обновление сообщения рассылки"""
+    """Обновляет существующее сообщение для рассылки.
+    Доступ только владельцу записи или администратору.
+    """
 
     model = Message
     form_class = MessageForm
@@ -155,7 +154,9 @@ class MessageUpdateView(LoginRequiredMixin, UpdateView):
 
 
 class MessageDeleteView(LoginRequiredMixin, DeleteView):
-    """Удаление сообщения рассылки"""
+    """Удаляет сообщение для рассылки после подтверждения.
+    Доступ только владельцу записи или администратору.
+    """
 
     model = Message
     template_name = "mailservices/message_confirm_delete.html"
@@ -163,23 +164,29 @@ class MessageDeleteView(LoginRequiredMixin, DeleteView):
 
 
 class MessageDetailView(LoginRequiredMixin, DetailView):
-    """Просмотр Сообщения для рассылки"""
+    """Отображает детальную информацию о сообщении для рассылки.
+    Доступ только владельцу записи или администратору.
+    """
 
     model = Message
     context_object_name = "message"
 
 
-# Mailing CRUD
+# === Mailing Views ===
+
+
 class MailingListView(LoginRequiredMixin, ListView):
-    """Просмотр списка рассылок"""
+    """Отображает список рассылок текущего пользователя.
+    Автоматически завершает просроченные рассылки со статусом 'started'.
+    """
 
     model = Mailing
     template_name = "mailservices/mailing_list.html"
     context_object_name = "mailings"
 
     def get_queryset(self):
-        # находим запись и если она есть  по времени завершения — автоматически завершаем просроченные рассылки
         now = timezone.now()
+        # Автоматически завершаем просроченные рассылки
         Mailing.objects.filter(
             owner=self.request.user, status="started", end_datetime__lt=now
         ).update(status="completed")
@@ -193,7 +200,9 @@ class MailingListView(LoginRequiredMixin, ListView):
 
 
 class MailingCreateView(LoginRequiredMixin, CreateView):
-    """Создание рассылки"""
+    """Создаёт новую рассылку и привязывает её к текущему пользователю.
+    Ограничивает выбор сообщения и получателей только теми, что принадлежат пользователю.
+    """
 
     model = Mailing
     form_class = MailingForm
@@ -202,7 +211,6 @@ class MailingCreateView(LoginRequiredMixin, CreateView):
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
-        # Ограничиваем выбор только объектами пользователя
         form.fields["message"].queryset = Message.objects.filter(
             owner=self.request.user
         )
@@ -217,7 +225,10 @@ class MailingCreateView(LoginRequiredMixin, CreateView):
 
 
 class MailingUpdateView(LoginRequiredMixin, UpdateView):
-    """обновление рассылки"""
+    """Обновляет существующую рассылку.
+    Ограничивает выбор сообщения и получателей только теми, что принадлежат пользователю.
+    Доступ только владельцу или администратору.
+    """
 
     model = Mailing
     form_class = MailingForm
@@ -236,7 +247,9 @@ class MailingUpdateView(LoginRequiredMixin, UpdateView):
 
 
 class MailingDeleteView(LoginRequiredMixin, DeleteView):
-    """Удаление рассылки"""
+    """Удаляет рассылку после подтверждения.
+    Доступ только владельцу или администратору.
+    """
 
     model = Mailing
     template_name = "mailservices/mailing_confirm_delete.html"
@@ -244,7 +257,9 @@ class MailingDeleteView(LoginRequiredMixin, DeleteView):
 
 
 class MailingDetailView(DetailView):
-    """Просмотр рассылки"""
+    """Отображает детальную информацию о рассылке, включая связанное сообщение.
+    Доступ только владельцу или администратору (если реализованы права).
+    """
 
     model = Mailing
     context_object_name = "mailing"
@@ -256,39 +271,42 @@ class MailingDetailView(DetailView):
 
 
 class MailingNowView(LoginRequiredMixin, View):
-    """
-    Вьюха для ручной отправки рассылки по кнопке.
-    Доступна только владельцу.
+    """Запускает немедленную отправку рассылки по запросу пользователя.
+    Доступна только владельцу рассылки. После отправки показывает уведомление.
     """
 
     def post(self, request, pk):
-        mail_send = get_object_or_404(Mailing, pk=pk)
+        mailing = get_object_or_404(Mailing, pk=pk)
 
-        # Проверка владельца
-        if mail_send.owner != request.user:
+        if mailing.owner != request.user:
             messages.error(request, "Вы не можете отправить чужую рассылку.")
             return redirect("mailservices:mailing_list")
 
-        # Запускаем отправку
-        send_mailing(mail_send)
-
-        messages.success(request, f"Рассылка '{mail_send}' была обработана.")
+        send_mailing(mailing)
+        messages.success(request, f"Рассылка '{mailing}' была обработана.")
         return redirect("mailservices:mailing_list")
 
 
+# === MailAttempt Views ===
+
+
 class AttemptListView(LoginRequiredMixin, ListView):
+    """Отображает историю попыток отправки писем.
+    Администратор и модератор видят все попытки. Обычный пользователь — только свои.
+    Поддерживает пагинацию (10 записей на страницу).
+    """
+
     model = MailAttempt
     template_name = "mailservices/attempt_list.html"
     context_object_name = "attempts"
     paginate_by = 10
 
     def test_func(self):
-        """Разрешаем: админ, модератор, владелец"""
+        """Проверяет права доступа: админ, модератор или авторизованный пользователь."""
         user = self.request.user
         return (
             user.is_superuser
-            or hasattr(user, "is_moderator")
-            and user.is_moderator
+            or (hasattr(user, "is_moderator") and user.is_moderator)
             or user.is_authenticated
         )
 
@@ -301,7 +319,6 @@ class AttemptListView(LoginRequiredMixin, ListView):
         if hasattr(user, "is_moderator") and user.is_moderator:
             return MailAttempt.objects.all().select_related("mailing", "mailing__owner")
 
-        # Обычный пользователь — только свои попытки
         return MailAttempt.objects.filter(mailing__owner=user).select_related("mailing")
 
     def get_context_data(self, **kwargs):

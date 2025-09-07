@@ -30,7 +30,13 @@ class RecipientForm(forms.ModelForm):
         )
 
     def clean_email(self):
-        """Метод проверки на email на корректность и его уникальность в Базе данных"""
+        """
+        Проверьте email на корректность формата и уникальность в базе данных.
+
+        Вызывает ValidationError, если:
+        - email не соответствует формату;
+        - email уже используется другим получателем (кроме редактируемого).
+        """
         email = self.cleaned_data.get("email")
         if email:
             try:
@@ -38,7 +44,6 @@ class RecipientForm(forms.ModelForm):
             except ValidationError:
                 raise forms.ValidationError("Введите корректный email-адрес.")
 
-            # Проверка уникальности email (кроме текущего пользователя)
             if (
                 Recipient.objects.exclude(pk=self.instance.pk)
                 .filter(email=email)
@@ -48,26 +53,38 @@ class RecipientForm(forms.ModelForm):
         return email
 
     def clean_full_name(self):
-        """Метод проверки ФИО"""
+        """
+        Проверьте, что ФИО состоит только из букв и пробелов и не является пустым.
+
+        Вызывает ValidationError, если:
+        - поле не заполнено;
+        - содержит только пробелы;
+        - содержит символы, отличные от букв и пробелов.
+        """
         full_name = self.cleaned_data.get("full_name")
 
-        if full_name:
-
-            full_name_stripped = full_name.strip()
-
-            if not full_name_stripped.replace(" ", "").isalpha():
-                raise ValidationError("Имя должно состоять только из букв и пробелов.")
-
-            if not full_name_stripped:
-                raise ValidationError(
-                    "Имя не может быть пустым или состоять только из пробелов."
-                )
-        else:
+        if not full_name:
             raise ValidationError("Имя обязательно для заполнения.")
+
+        full_name_stripped = full_name.strip()
+
+        if not full_name_stripped:
+            raise ValidationError(
+                "Имя не может быть пустым или состоять только из пробелов."
+            )
+
+        if not full_name_stripped.replace(" ", "").isalpha():
+            raise ValidationError("Имя должно состоять только из букв и пробелов.")
+
         return full_name
 
     def clean_comment(self):
-        """Валидатор корректности описания"""
+        """
+        Проверьте комментарий на наличие запрещённых слов (регистронезависимо).
+
+        Если комментарий пуст — проверка пропускается.
+        Вызывает ValidationError при обнаружении любого слова из FORBIDDEN_WORDS.
+        """
         comment = self.cleaned_data.get("comment", "")
         if not comment.strip():
             return comment
@@ -94,11 +111,19 @@ class MessageForm(forms.ModelForm):
         )
 
         self.fields["mail_body"].widget.attrs.update(
-            {"class": "form-control", "placeholder": "Текс письма"}
+            {
+                "class": "form-control",
+                "placeholder": "Текст письма",
+            }  # ← исправлена опечатка
         )
 
     def clean_mail_title(self):
-        """Валидатор корректности заголовка рассылки сообщения"""
+        """
+        Проверьте заголовок письма на наличие запрещённых слов (регистронезависимо).
+
+        Если заголовок пуст — проверка пропускается.
+        Вызывает ValidationError при обнаружении любого слова из FORBIDDEN_WORDS.
+        """
         mail_title = self.cleaned_data.get("mail_title", "")
         if not mail_title.strip():
             return mail_title
@@ -110,7 +135,12 @@ class MessageForm(forms.ModelForm):
         return mail_title
 
     def clean_mail_body(self):
-        """Валидатор корректности тела письма сообщения"""
+        """
+        Проверьте тело письма на наличие запрещённых слов (регистронезависимо).
+
+        Если тело письма пустое — проверка пропускается.
+        Вызывает ValidationError при обнаружении любого слова из FORBIDDEN_WORDS.
+        """
         mail_body = self.cleaned_data.get("mail_body", "")
         if not mail_body.strip():
             return mail_body

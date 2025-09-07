@@ -79,21 +79,19 @@ def email_verification(request, token):
 
 
 class UserProfileView(View):
-    '''Вьюшка кабинета пользователя'''
-
+    """Вьюшка кабинета пользователя"""
 
     def get(self, request):
         user = request.user
         attempts = MailAttempt.objects.filter(mailing__owner=user)
 
         context = {
-            'user_profile': user,
-            'total_attempts': attempts.count(),
-            'successful_attempts': attempts.filter(status='success').count(),
-            'failed_attempts': attempts.filter(status='failed').count(),
+            "user_profile": user,
+            "total_attempts": attempts.count(),
+            "successful_attempts": attempts.filter(status="success").count(),
+            "failed_attempts": attempts.filter(status="failed").count(),
         }
-        return render(request, 'users/profile.html', context)
-
+        return render(request, "users/profile.html", context)
 
 
 class UserLoginView(LoginView):
@@ -122,4 +120,3 @@ class UserProfileEditView(LoginRequiredMixin, UpdateView):
             User: Объект текущего пользователя.
         """
         return self.request.user  # редактируем только текущего пользователя
-
