@@ -29,9 +29,9 @@ class Recipient(models.Model):
         verbose_name_plural = "Получатели рассылки"
 
         # Права для менеджеров
-        # permissions = [
-        #     ("can_view_all_recipients", "Может просматривать всех получателей"),
-        # ]
+        permissions = [
+            ("can_view_all_recipients", "Может просматривать всех получателей"),
+        ]
 
     def __str__(self):
         return f"{self.full_name} ({self.email})"
@@ -54,6 +54,11 @@ class Message(models.Model):
     class Meta:
         verbose_name = "Сообщение"
         verbose_name_plural = "Сообщения"
+
+        # Права для менеджеров
+        permissions = [
+            ("can_view_all_messages", "Может просматривать все сообщения"),
+        ]
 
     def __str__(self):
         return self.mail_title
@@ -88,9 +93,9 @@ class Mailing(models.Model):
         verbose_name_plural = "Рассылки"
 
         # Права для менеджеров
-        # permissions = [
-        #     ("can_view_all_mailings", "Может просматривать все рассылки"),
-        # ]
+        permissions = [
+            ("can_view_all_mailings", "Может просматривать все рассылки"),
+        ]
 
     def clean(self):
         super().clean()
