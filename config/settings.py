@@ -113,11 +113,11 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 AUTH_USER_MODEL = 'users.User'  # ← указываем, что User — из приложения users
 
-# LOGIN_REDIRECT_URL = 'users:profile'  # или '/profile/', куда перейти после входа
-# LOGOUT_REDIRECT_URL = 'catalog:home'  # куда после выхода
-# LOGIN_URL = 'users:login'  # будет перенаправлено по ссылке LoginRequiredMixin
-#
-#
+LOGIN_REDIRECT_URL = 'users:profile'  # или '/profile/', куда перейти после входа
+LOGOUT_REDIRECT_URL = 'mailservices:home'  # куда после выхода
+LOGIN_URL = 'users:login'  # будет перенаправлено по ссылке LoginRequiredMixin
+
+
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend' #Настройки почты
 EMAIL_HOST = 'smtp.yandex.ru'
 EMAIL_PORT = 465

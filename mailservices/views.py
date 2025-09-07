@@ -15,20 +15,55 @@ from .services import send_mailing
 
 # Главная страница — отображение статистики
 # @login_required
+# def home_view(request):
+#     """ Отображение главное страницы количество всех рассылок, количество активных рассылок (со статусом
+#     'Запущена') и количество уникальных получателей.
+#     """
+#     total_mailings = Mailing.objects.filter(owner=request.user).count()
+#     active_mailings = Mailing.objects.filter(owner=request.user, status="started").count()
+#     unique_recipients = Recipient.objects.filter(owner=request.user).values('email').distinct().count()
+#
+#     context = {
+#         "total_mailings": total_mailings,
+#         "active_mailings": active_mailings,
+#         "unique_recipients": unique_recipients,
+#     }
+#     return render(request, "mailservices/home.html", context)
+
+
 def home_view(request):
-    """ Отображение главное страницы количество всех рассылок, количество активных рассылок (со статусом
-    'Запущена') и количество уникальных получателей.
-    """
-    total_mailings = Mailing.objects.filter(owner=request.user).count()
-    active_mailings = Mailing.objects.filter(owner=request.user, status="started").count()
-    unique_recipients = Recipient.objects.filter(owner=request.user).values('email').distinct().count()
+    # Общая статистика (видна всем)
+    total_mailings = Mailing.objects.count()
+    unique_recipients = Recipient.objects.count()
+
+    # Активные рассылки: started или created (тоже общая или по владельцу)
+    active_mailings = Mailing.objects.filter(
+        status__in=['created', 'started']
+    ).count()
+
+    # Если пользователь авторизован — показываем его статистику
+    if request.user.is_authenticated:
+        my_total = Mailing.objects.filter(owner=request.user).count()
+        my_active = Mailing.objects.filter(
+            owner=request.user,
+            status__in=['created', 'started']
+        ).count()
+    else:
+        my_total = 0
+        my_active = 0
 
     context = {
         "total_mailings": total_mailings,
         "active_mailings": active_mailings,
         "unique_recipients": unique_recipients,
+
+        # Опционально: свои показатели
+        'my_total': my_total,
+        'my_active': my_active,
     }
     return render(request, "mailservices/home.html", context)
+
+
 
 
 # Recipient CRUD
