@@ -43,13 +43,18 @@
                         <a href="{% url 'users:register' %}" class="text-decoration-none">
                             <strong>Зарегистрироваться</strong>
                         </a>
+                        <!-- Добавляем блок восстановления пароля -->
+                        <p>
+                            Забыли пароль?
+                            <a href="{% url 'users:password_reset' %}" class="btn btn-link">Восстановить пароль</a>
+                        </p>
                     </div>
                 </div>
             </div>
 
             <!-- Текст снизу (опционально) -->
             <div class="text-center mt-3">
-                <small class="text-muted">Дружелюбный интернет-магазин © 2025</small>
+                <small class="text-muted">Сервис почтовых рассылок</small>
             </div>
         </div>
     </div>

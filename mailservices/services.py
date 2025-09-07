@@ -21,7 +21,7 @@ def send_mailing(mailing):
     logger.info(f"Текущий статус: {mailing.status}")
 
     # 1. Уже завершена — выходим
-    if mailing.status == 'completed':
+    if mailing.status == "completed":
         logger.warning(f"Рассылка {mailing.pk} уже завершена. Выход.")
         print("  Уже завершена — выход.")
         return
@@ -38,7 +38,7 @@ def send_mailing(mailing):
         print("  ВРЕМЯ ИСТЕКЛО — МЕНЯЕМ СТАТУС НА 'completed'")
         logger.warning(f"  Время окончания прошло. Завершаем рассылку {mailing.pk}.")
 
-        mailing.status = 'completed'
+        mailing.status = "completed"
         mailing.save()  # Сохраняем в БД
 
         # Принудительно перечитываем из БД, чтобы убедиться
@@ -49,10 +49,10 @@ def send_mailing(mailing):
         return
 
     # 3. Если создана — меняем на "started"
-    if mailing.status == 'created':
+    if mailing.status == "created":
         print("  Меняем статус с 'created' на 'started'")
         logger.info(f"Рассылка {mailing.pk} в статусе 'created'. Меняем на 'started'.")
-        mailing.status = 'started'
+        mailing.status = "started"
         mailing.save()
         logger.info("Статус изменён на 'started'.")
 
@@ -73,21 +73,19 @@ def send_mailing(mailing):
                 message=body,
                 from_email=from_email,
                 recipient_list=[client.email],
-                fail_silently=False,# Параметр для отлова ошибки отправления
+                fail_silently=False,  # Параметр для отлова ошибки отправления
             )
-            status = 'success'
-            server_response = 'Успешно отправлено'
+            status = "success"
+            server_response = "Успешно отправлено"
             logger.info(f"  Письмо на {client.email} отправлено.")
         except Exception as e:
-            status = 'failed'
+            status = "failed"
             server_response = str(e)
             logger.error(f"  Ошибка при отправке на {client.email}: {e}")
 
         # Заполняем попытку в модель
         MailAttempt.objects.create(
-            status=status,
-            server_response=server_response,
-            mailing=mailing
+            status=status, server_response=server_response, mailing=mailing
         )
 
     # 5. Проверка времени ПОСЛЕ отправки
@@ -95,10 +93,12 @@ def send_mailing(mailing):
     logger.info(f"Отправка завершена. Текущее время: {now_after}")
 
     if now_after >= mailing.end_datetime:
-        logger.warning(f"  Время окончания достигнуто. Завершаем рассылку {mailing.pk}.")
-        if mailing.status != 'completed':
+        logger.warning(
+            f"  Время окончания достигнуто. Завершаем рассылку {mailing.pk}."
+        )
+        if mailing.status != "completed":
             print("  Время истекло после отправки — завершаем.")
-            mailing.status = 'completed'
+            mailing.status = "completed"
             mailing.save()
 
             # Достаем обновленные данные из БД

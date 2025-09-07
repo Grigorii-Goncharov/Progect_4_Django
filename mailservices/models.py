@@ -20,11 +20,18 @@ class Recipient(models.Model):
         help_text="Дополнительная информация о получателе",
     )
 
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Владелец")
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Владелец"
+    )
 
     class Meta:
         verbose_name = "Получатель рассылки"
         verbose_name_plural = "Получатели рассылки"
+
+        # Права для менеджеров
+        # permissions = [
+        #     ("can_view_all_recipients", "Может просматривать всех получателей"),
+        # ]
 
     def __str__(self):
         return f"{self.full_name} ({self.email})"
@@ -40,7 +47,9 @@ class Message(models.Model):
         verbose_name="Тело письма", help_text="Содержание письма"
     )
 
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Владелец")
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Владелец"
+    )
 
     class Meta:
         verbose_name = "Сообщение"
@@ -70,30 +79,37 @@ class Mailing(models.Model):
     )
     recipients = models.ManyToManyField(Recipient, verbose_name="Получатели")
 
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Владелец")
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Владелец"
+    )
 
     class Meta:
         verbose_name = "Рассылка"
         verbose_name_plural = "Рассылки"
+
+        # Права для менеджеров
+        # permissions = [
+        #     ("can_view_all_mailings", "Может просматривать все рассылки"),
+        # ]
 
     def clean(self):
         super().clean()
 
         if self.start_datetime and self.end_datetime:
             if self.start_datetime >= self.end_datetime:
-                raise ValidationError({
-                    'end_datetime': 'Дата окончания должна быть позже даты начала.'
-                })
+                raise ValidationError(
+                    {"end_datetime": "Дата окончания должна быть позже даты начала."}
+                )
 
             if self.start_datetime < timezone.now():
-                raise ValidationError({
-                    'start_datetime': 'Дата начала не может быть в прошлом.'
-                })
+                raise ValidationError(
+                    {"start_datetime": "Дата начала не может быть в прошлом."}
+                )
 
             if (self.end_datetime - self.start_datetime).days > 365:
-                raise ValidationError({
-                    'end_datetime': 'Рассылка не может длиться больше года.'
-                })
+                raise ValidationError(
+                    {"end_datetime": "Рассылка не может длиться больше года."}
+                )
 
     def __str__(self):
         return f"Рассылка {self.start_datetime} — {self.status}"

@@ -119,4 +119,6 @@ class UserProfileEditView(LoginRequiredMixin, UpdateView):
             User: Объект текущего пользователя.
         """
         return self.request.user  # редактируем только текущего пользователя
+
+
 from django.shortcuts import render
