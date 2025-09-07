@@ -10,18 +10,18 @@
                 <div class="card-body p-5 text-center">
 
                     <!-- Изображение -->
-                    <div class="text-center my-3">
-                        {% if user.image %}
+<!--                    <div class="text-center my-3">-->
+<!--                        {% if user.image %}-->
 
-                        <img src="{{ user.image.url }}"
-                             alt="{{ user.name|escape }}"
-                             class="rounded" style="height: 400px; object-fit: cover; width: 80%; max-width: 500px;">
-                        {% else %}
-                        <img src="https://via.placeholder.com/500x400?text=Нет+фото"
-                             alt="Нет изображения"
-                             class="rounded" style="height: 400px; object-fit: cover; width: 80%; max-width: 500px;">
-                        {% endif %}
-                    </div>
+<!--                        <img src="{{ user.image.url }}"-->
+<!--                             alt="{{ user.name|escape }}"-->
+<!--                             class="rounded" style="height: 400px; object-fit: cover; width: 80%; max-width: 500px;">-->
+<!--                        {% else %}-->
+<!--                        <img src="https://via.placeholder.com/500x400?text=Нет+фото"-->
+<!--                             alt="Нет изображения"-->
+<!--                             class="rounded" style="height: 400px; object-fit: cover; width: 80%; max-width: 500px;">-->
+<!--                        {% endif %}-->
+<!--                    </div>-->
 
 
                     <!-- Заголовок -->
@@ -47,6 +47,12 @@
                     <a href="{% url 'users:profile_edit' %}" class="btn btn-warning btn-lg px-4 rounded-pill shadow-sm">
                         <i class="bi bi-pencil-square"></i> Редактировать профиль
                     </a>
+                    <a href="{% url 'mailservices:attempt_list' %}" class="btn btn-info  btn-lg px-4 rounded-pill shadow-sm"">
+                        <i class="bi bi-pencil-square"></i>
+                        Статистика рассылок
+                    </a>
+
+
                 </div>
             </div>
         </div>
