@@ -1,5 +1,6 @@
 # views.py
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
@@ -9,26 +10,8 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView, D
 from django.urls import reverse_lazy
 
 from .forms import RecipientForm, MessageForm, MailingForm
-from .models import Mailing, Recipient, Message
+from .models import Mailing, Recipient, Message, MailAttempt
 from .services import send_mailing
-
-
-# Главная страница — отображение статистики
-# @login_required
-# def home_view(request):
-#     """ Отображение главное страницы количество всех рассылок, количество активных рассылок (со статусом
-#     'Запущена') и количество уникальных получателей.
-#     """
-#     total_mailings = Mailing.objects.filter(owner=request.user).count()
-#     active_mailings = Mailing.objects.filter(owner=request.user, status="started").count()
-#     unique_recipients = Recipient.objects.filter(owner=request.user).values('email').distinct().count()
-#
-#     context = {
-#         "total_mailings": total_mailings,
-#         "active_mailings": active_mailings,
-#         "unique_recipients": unique_recipients,
-#     }
-#     return render(request, "mailservices/home.html", context)
 
 
 def home_view(request):
@@ -65,9 +48,8 @@ def home_view(request):
 
 
 
-
 # Recipient CRUD
-class RecipientListView(ListView):
+class RecipientListView(LoginRequiredMixin, ListView):
 
     model = Recipient
     template_name = "mailservices/recipient_list.html"
@@ -77,7 +59,7 @@ class RecipientListView(ListView):
         return Recipient.objects.filter(owner=self.request.user)
 
 
-class RecipientCreateView(CreateView):
+class RecipientCreateView(LoginRequiredMixin, CreateView):
     """Внесение записи клиента"""
     model = Recipient
     form_class = RecipientForm
@@ -88,14 +70,14 @@ class RecipientCreateView(CreateView):
         form.instance.owner = self.request.user
         return super().form_valid(form)
 
-class RecipientDetailView(DetailView):
+class RecipientDetailView(LoginRequiredMixin, DetailView):
     """Просмотр записи о клиенте"""
     model = Recipient
     context_object_name = "recipient"
     # pk_url_kwarg = "pk"
 
 
-class RecipientUpdateView(UpdateView):
+class RecipientUpdateView(LoginRequiredMixin, UpdateView):
     """Обновление записи клиента"""
     model = Recipient
     fields = ["email", "full_name", "comment"]
@@ -103,14 +85,19 @@ class RecipientUpdateView(UpdateView):
     success_url = reverse_lazy("mailservices:recipient_list")
 
 
-class RecipientlistView(ListView):
-    """Просмотр списка клиентов"""
+class RecipientListView(LoginRequiredMixin, ListView):
+    """Просмотр всех записей клиентов"""
     model = Recipient
-    context_object_name = "products"
-    template_name = "mailservices/home.html"
+    template_name = "mailservices/recipient_list.html"
+    context_object_name = "recipients"
+
+    def get_queryset(self):
+        if self.request.user.is_superuser:
+            return Recipient.objects.all()  # Админ видит всех
+        return Recipient.objects.filter(owner=self.request.user)  # Обычный пользователь — только свои
 
 
-class RecipientDeleteView(DeleteView):
+class RecipientDeleteView(LoginRequiredMixin, DeleteView):
     """просмотр записи клиента"""
     model = Recipient
     template_name = "mailservices/recipient_confirm_delete.html"
@@ -118,17 +105,22 @@ class RecipientDeleteView(DeleteView):
 
 
 # Message CRUD
-class MessageListView(ListView):
+class MessageListView(LoginRequiredMixin, ListView):
     """просмотр всех сообщений"""
     model = Message
     template_name = "mailservices/message_list.html"
     context_object_name = "messages"
 
+    # def get_queryset(self):
+    #     return Message.objects.filter(owner=self.request.user)
+
     def get_queryset(self):
-        return Message.objects.filter(owner=self.request.user)
+        if self.request.user.is_superuser:
+            return Message.objects.all()  # Админ видит всех
+        return Message.objects.filter(owner=self.request.user)  # Обычный пользователь — только свои
 
 
-class MessageCreateView(CreateView):
+class MessageCreateView(LoginRequiredMixin, CreateView):
     """Создание сообщения"""
     model = Message
     form_class = MessageForm
@@ -140,7 +132,7 @@ class MessageCreateView(CreateView):
         return super().form_valid(form)
 
 
-class MessageUpdateView(UpdateView):
+class MessageUpdateView(LoginRequiredMixin, UpdateView):
     """Обновление сообщения рассылки"""
     model = Message
     form_class = MessageForm
@@ -148,21 +140,21 @@ class MessageUpdateView(UpdateView):
     success_url = reverse_lazy("mailservices:message_list")
 
 
-class MessageDeleteView(DeleteView):
+class MessageDeleteView(LoginRequiredMixin, DeleteView):
     """Удаление сообщения рассылки"""
     model = Message
     template_name = "mailservices/message_confirm_delete.html"
     success_url = reverse_lazy("mailservices:message_list")
 
 
-class MessageDetailView(DetailView):
+class MessageDetailView(LoginRequiredMixin, DetailView):
     """Просмотр Сообщения для рассылки"""
     model = Message
     context_object_name = "message"
 
 
 # Mailing CRUD
-class MailingListView(ListView):
+class MailingListView(LoginRequiredMixin, ListView):
     """Просмотр списка рассылок"""
     model = Mailing
     template_name = "mailservices/mailing_list.html"
@@ -185,7 +177,7 @@ class MailingListView(ListView):
         return context
 
 
-class MailingCreateView(CreateView):
+class MailingCreateView(LoginRequiredMixin, CreateView):
     """Создание рассылки"""
     model = Mailing
     form_class = MailingForm
@@ -204,7 +196,7 @@ class MailingCreateView(CreateView):
         return super().form_valid(form)
 
 
-class MailingUpdateView(UpdateView):
+class MailingUpdateView(LoginRequiredMixin, UpdateView):
     """обновление рассылки"""
     model = Mailing
     form_class = MailingForm
@@ -218,7 +210,7 @@ class MailingUpdateView(UpdateView):
         return form
 
 
-class MailingDeleteView(DeleteView):
+class MailingDeleteView(LoginRequiredMixin, DeleteView):
     """Удаление рассылки"""
     model = Mailing
     template_name = "mailservices/mailing_confirm_delete.html"
@@ -236,7 +228,7 @@ class MailingDetailView(DetailView):
         return context
 
 
-class MailingNowView(View):
+class MailingNowView(LoginRequiredMixin, View):
     """
     Вьюха для ручной отправки рассылки по кнопке.
     Доступна только владельцу.
@@ -257,3 +249,30 @@ class MailingNowView(View):
         return redirect('mailservices:mailing_list')
 
 
+class AttemptListView(LoginRequiredMixin, ListView):
+    model = MailAttempt
+    template_name = 'mailservices/attempt_list.html'
+    context_object_name = 'attempts'
+    paginate_by = 10
+
+    def test_func(self):
+        """Разрешаем: админ, модератор, владелец"""
+        user = self.request.user
+        return user.is_superuser or hasattr(user, 'is_moderator') and user.is_moderator or user.is_authenticated
+
+    def get_queryset(self):
+        user = self.request.user
+
+        if user.is_superuser:
+            return MailAttempt.objects.all().select_related('mailing', 'mailing__owner')
+
+        if hasattr(user, 'is_moderator') and user.is_moderator:
+            return MailAttempt.objects.all().select_related('mailing', 'mailing__owner')
+
+        # Обычный пользователь — только свои попытки
+        return MailAttempt.objects.filter(mailing__owner=user).select_related('mailing')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'История отправки писем'
+        return context
