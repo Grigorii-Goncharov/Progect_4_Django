@@ -66,12 +66,16 @@ urlpatterns = [
         views.MailingDeleteView.as_view(),
         name="mailing_confirm_delete",
     ),
+
     # attempt_list и send_mailing_now
     path("<int:pk>/send/", views.MailingNowView.as_view(), name="send_mailing_now"),
     path("attempts/", views.AttemptListView.as_view(), name="attempt_list"),
 
+    # Администрирование
     path('users/<int:user_id>/', views.UserRecipientListView.as_view(), name='user_recipient_list'),
     path('users/<int:user_id>/messages/', views.UserMessageListView.as_view(), name='user_message_list'),
     path('users/<int:user_id>/mailing/', views.UserMailingListView.as_view(), name='user_mailing_list'),
+    path('users/toggle-mailing/<int:pk>/', views.toggle_user_block_mailing, name='toggle_user_block_mailing'),
+
 
 ]

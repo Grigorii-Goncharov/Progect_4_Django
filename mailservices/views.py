@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
@@ -432,3 +433,15 @@ class UserMailingListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         context['owner'] = self.owner  # теперь self.owner определён
         context['now'] = timezone.now()  # Для корректного отображения кнопки "Отправить" в шаблоне по времени
         return context
+
+
+@login_required
+def toggle_user_block_mailing(request, pk):
+    """Блокировка рассылки пользователя админом или модератором"""
+    mailing = get_object_or_404(Mailing, pk=pk)
+
+    # Переключаем статус
+    mailing.status = "completed"
+    mailing.save()
+
+    return redirect('mailservices:mailing_list')

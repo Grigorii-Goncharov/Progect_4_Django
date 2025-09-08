@@ -57,8 +57,11 @@
                        title="Удалить">
                         <i class="fas fa-trash"></i>
                     </a>
+                    {% if perms.mailservices %}
+                            <a href="{% url 'mailservices:toggle_user_block_mailing' mailing.pk %}" class="btn btn-sm btn-danger">Заблокировать рассылку</a>
+                        {% endif %}
 
-                    <!-- Отправить сейчас / Статус (в виде кнопки для единообразия) -->
+
                     {% if mailing.status != 'completed' and mailing.end_datetime > now %}
                     <form method="post" action="{% url 'mailservices:send_mailing_now' mailing.pk %}" class="d-inline">
                         {% csrf_token %}
