@@ -24,22 +24,29 @@
 
                     <!-- Клиенты -->
                     <td>
-                        <a href="#" class="btn btn-sm btn-outline-primary">
-                            {{ user.clients.count }}
+                        <a href="{% url 'mailservices:user_mailing_list' user_id=user.pk %}"
+                           class="btn btn-outline-success d-flex align-items-center gap-2 px-3 py-2"
+                           style="border-radius: 8px; transition: all 0.3s ease; border-color: #73f2e7;">
+                            <i class="bi bi-send-fill" style="font-size: 1.1rem;">Посмотреть</i>
+                            <span class="fw-medium">{{ user.sendings.count }}</span>
                         </a>
                     </td>
-
                     <!-- Сообщения -->
                     <td>
-                        <a href="#" class="btn btn-sm btn-outline-info">
-                            {{ user.messages.count }}
+                        <a href="{% url 'mailservices:user_mailing_list' user_id=user.pk %}"
+                           class="btn btn-outline-info d-flex align-items-center gap-2 px-3 py-2"
+                           style="border-radius: 8px; transition: all 0.3s ease; border-color: #73f2e7;">
+                            <i class="bi bi-send-fill" style="font-size: 1.1rem;">Посмотреть</i>
+                            <span class="fw-medium">{{ user.sendings.count }}</span>
                         </a>
                     </td>
-
                     <!-- Рассылки -->
                     <td>
-                        <a href="#" class="btn btn-sm btn-outline-success">
-                            {{ user.sendings.count }}
+                        <a href="{% url 'mailservices:user_mailing_list' user_id=user.pk %}"
+                           class="btn btn-outline-primary d-flex align-items-center gap-2 px-3 py-2"
+                           style="border-radius: 8px; transition: all 0.3s ease; border-color: #0d6efd;">
+                            <i class="bi bi-send-fill" style="font-size: 1.1rem;">Посмотреть</i>
+                            <span class="fw-medium">{{ user.sendings.count }}</span>
                         </a>
                     </td>
 
@@ -79,6 +86,7 @@ function toggleUserStatus(userId) {
     // Получаем кнопку по ID
     const button = document.getElementById(`toggle-btn-${userId}`);
 
+
     fetch(`/users/toggle/${userId}/`, {
         method: 'POST',
         headers: {
@@ -102,7 +110,6 @@ function toggleUserStatus(userId) {
         console.error(error);
     });
 }
-
 
 // Вспомогательная функция для получения CSRF-токена
 function getCookie(name) {

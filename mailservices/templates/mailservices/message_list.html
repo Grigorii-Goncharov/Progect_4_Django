@@ -5,7 +5,7 @@
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0">Список сообщений</h2>
+    <h2 class="mb-0">Список сообщений {{ owner.email }} </h2>
     <a href="{% url 'mailservices:message_create' %}" class="btn btn-success">
         <i class="fas fa-plus"></i> Добавить сообщение
     </a>

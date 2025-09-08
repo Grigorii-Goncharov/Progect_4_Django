@@ -1,5 +1,5 @@
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.views import View
@@ -12,6 +12,7 @@ from django.views.generic import (
 )
 from django.urls import reverse_lazy
 
+from users.models import User
 from .forms import RecipientForm, MessageForm, MailingForm
 from .models import Mailing, Recipient, Message, MailAttempt
 from .services import send_mailing
@@ -324,4 +325,110 @@ class AttemptListView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["title"] = "История отправки писем"
+        return context
+
+# === просмотр информации пользователей группами Админа и Модератора ===
+
+class UserRecipientListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    """
+    Отображает список получателей, принадлежащих указанному пользователю.
+    Доступ имеют пользователи с правом 'mailservices.can_view_all_recipients'.
+    Attributes:
+        model (Model): Recipient.
+        template_name (str): Шаблон 'mailservices/client_list.html'.
+        context_object_name (str): Имя переменной в шаблоне — 'recipients'.
+    URL параметр:
+        user_id (int): ID пользователя, чьих получателей нужно отобразить.
+    Context:
+        owner (User): Пользователь, которому принадлежат получатели.
+    """
+    model = Recipient
+    template_name = 'mailservices/client_list.html'
+    context_object_name = 'recipients'  # теперь в шаблоне: {{ clients }}
+
+    def test_func(self):
+        """Разрешаем доступ, если есть право просмотра всех клиентов"""
+        return self.request.user.has_perm('mailservices.can_view_all_recipients')
+
+    def get_queryset(self):
+        # Получаем ID пользователя из URL
+        user_id = self.kwargs['user_id']
+        # Находим владельца
+        self.owner = get_object_or_404(User, pk=user_id)
+        # Возвращаем клиентов этого владельца
+        return Recipient.objects.filter(owner=self.owner)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['owner'] = self.owner  # теперь self.owner определён
+        return context
+
+
+class UserMessageListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    """
+    Отображает список сообщений, принадлежащих указанному пользователю.
+    Доступ имеют пользователи с правом 'mailservices.can_view_all_messages'.
+    Attributes:
+        model (Model): Message.
+        template_name (str): Шаблон 'mailservices/message_list.html'.
+        context_object_name (str): Имя переменной в шаблоне — 'messages'.
+    URL параметр:
+        user_id (int): ID пользователя, чьи сообщения нужно отобразить.
+    Context:
+        owner (User): Пользователь, которому принадлежат сообщения.
+    """
+
+    model = Message
+    template_name = 'mailservices/message_list.html'
+    context_object_name = 'messages'
+
+    def test_func(self):
+        return self.request.user.has_perm('mailservices.can_view_all_messages')
+
+    def get_queryset(self):
+        # Получаем ID пользователя из URL
+        user_id = self.kwargs['user_id']
+        # Находим владельца
+        self.owner = get_object_or_404(User, pk=user_id)
+        # Возвращаем клиентов этого владельца
+        return Message.objects.filter(owner=self.owner)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['owner'] = self.owner  # теперь self.owner определён
+        return context
+
+class UserMailingListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    """
+    Отображает список рассылок, принадлежащих указанному пользователю.
+    Доступ имеют пользователи с правом 'mailservices.can_view_all_mailings'.
+    Attributes:
+        model (Model): Mailing.
+        template_name (str): Шаблон 'mailservices/mailing_list.html'.
+        context_object_name (str): Имя переменной в шаблоне — 'mailing'.
+    URL параметр:
+        user_id (int): ID пользователя, чьи рассылки нужно отобразить.
+    Context:
+        owner (User): Пользователь, которому принадлежат рассылки.
+        now (datetime): Текущее время для отображения кнопок управления в шаблоне.
+        """
+    model = Mailing
+    template_name = 'mailservices/mailing_list.html'
+    context_object_name = 'mailing'
+
+    def test_func(self):
+        return self.request.user.has_perm('mailservices.can_view_all_mailings')
+
+    def get_queryset(self):
+        # Получаем ID пользователя из URL
+        user_id = self.kwargs['user_id']
+        # Находим владельца
+        self.owner = get_object_or_404(User, pk=user_id)
+        # Возвращаем клиентов этого владельца
+        return Mailing.objects.filter(owner=self.owner)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['owner'] = self.owner  # теперь self.owner определён
+        context['now'] = timezone.now()  # Для корректного отображения кнопки "Отправить" в шаблоне по времени
         return context
