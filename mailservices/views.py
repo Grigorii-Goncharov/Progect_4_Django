@@ -328,7 +328,9 @@ class AttemptListView(LoginRequiredMixin, ListView):
         context["title"] = "История отправки писем"
         return context
 
+
 # === просмотр информации пользователей группами Админа и Модератора ===
+
 
 class UserRecipientListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     """
@@ -343,17 +345,18 @@ class UserRecipientListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     Context:
         owner (User): Пользователь, которому принадлежат получатели.
     """
+
     model = Recipient
-    template_name = 'mailservices/client_list.html'
-    context_object_name = 'recipients'  # теперь в шаблоне: {{ clients }}
+    template_name = "mailservices/client_list.html"
+    context_object_name = "recipients"  # теперь в шаблоне: {{ clients }}
 
     def test_func(self):
         """Разрешаем доступ, если есть право просмотра всех клиентов"""
-        return self.request.user.has_perm('mailservices.can_view_all_recipients')
+        return self.request.user.has_perm("mailservices.can_view_all_recipients")
 
     def get_queryset(self):
         # Получаем ID пользователя из URL
-        user_id = self.kwargs['user_id']
+        user_id = self.kwargs["user_id"]
         # Находим владельца
         self.owner = get_object_or_404(User, pk=user_id)
         # Возвращаем клиентов этого владельца
@@ -361,7 +364,7 @@ class UserRecipientListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['owner'] = self.owner  # теперь self.owner определён
+        context["owner"] = self.owner  # теперь self.owner определён
         return context
 
 
@@ -380,15 +383,15 @@ class UserMessageListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     """
 
     model = Message
-    template_name = 'mailservices/message_list.html'
-    context_object_name = 'messages'
+    template_name = "mailservices/message_list.html"
+    context_object_name = "messages"
 
     def test_func(self):
-        return self.request.user.has_perm('mailservices.can_view_all_messages')
+        return self.request.user.has_perm("mailservices.can_view_all_messages")
 
     def get_queryset(self):
         # Получаем ID пользователя из URL
-        user_id = self.kwargs['user_id']
+        user_id = self.kwargs["user_id"]
         # Находим владельца
         self.owner = get_object_or_404(User, pk=user_id)
         # Возвращаем клиентов этого владельца
@@ -396,8 +399,9 @@ class UserMessageListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['owner'] = self.owner  # теперь self.owner определён
+        context["owner"] = self.owner  # теперь self.owner определён
         return context
+
 
 class UserMailingListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     """
@@ -412,17 +416,18 @@ class UserMailingListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     Context:
         owner (User): Пользователь, которому принадлежат рассылки.
         now (datetime): Текущее время для отображения кнопок управления в шаблоне.
-        """
+    """
+
     model = Mailing
-    template_name = 'mailservices/mailing_list.html'
-    context_object_name = 'mailing'
+    template_name = "mailservices/mailing_list.html"
+    context_object_name = "mailing"
 
     def test_func(self):
-        return self.request.user.has_perm('mailservices.can_view_all_mailings')
+        return self.request.user.has_perm("mailservices.can_view_all_mailings")
 
     def get_queryset(self):
         # Получаем ID пользователя из URL
-        user_id = self.kwargs['user_id']
+        user_id = self.kwargs["user_id"]
         # Находим владельца
         self.owner = get_object_or_404(User, pk=user_id)
         # Возвращаем клиентов этого владельца
@@ -430,8 +435,10 @@ class UserMailingListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['owner'] = self.owner  # теперь self.owner определён
-        context['now'] = timezone.now()  # Для корректного отображения кнопки "Отправить" в шаблоне по времени
+        context["owner"] = self.owner  # теперь self.owner определён
+        context["now"] = (
+            timezone.now()
+        )  # Для корректного отображения кнопки "Отправить" в шаблоне по времени
         return context
 
 
@@ -444,4 +451,4 @@ def toggle_user_block_mailing(request, pk):
     mailing.status = "completed"
     mailing.save()
 
-    return redirect('mailservices:mailing_list')
+    return redirect("mailservices:mailing_list")
