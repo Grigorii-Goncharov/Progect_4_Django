@@ -182,10 +182,10 @@ class UserListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
             dict: Расширенный контекст шаблона.
         """
         context = super().get_context_data(**kwargs)
-        context['message_list'] = Message.objects.all()
-        context['mailing_list'] = Mailing.objects.all()
-        context['recipient_list'] = Recipient.objects.all()
-        context['title'] = 'Панель администратора: Все данные'
+        context["message_list"] = Message.objects.all()
+        context["mailing_list"] = Mailing.objects.all()
+        context["recipient_list"] = Recipient.objects.all()
+        context["title"] = "Панель администратора: Все данные"
         return context
 
 
@@ -202,14 +202,14 @@ def toggle_user_active(request, pk):
         HttpResponseRedirect: Перенаправление на список пользователей с сообщением об успешном действии.
     """
     if not request.user.is_superuser:
-        return redirect('users:user_list')
+        return redirect("users:user_list")
 
     user = get_object_or_404(User, pk=pk)
 
     # Защита от самоблокирования
     if user.pk == request.user.pk:
         messages.error(request, "Нельзя заблокировать самого себя!")
-        return redirect('users:user_list')
+        return redirect("users:user_list")
 
     # Переключаем статус
     user.is_active = not user.is_active
@@ -221,5 +221,4 @@ def toggle_user_active(request, pk):
     else:
         messages.warning(request, f"Пользователь {user.username} заблокирован.")
 
-    return redirect('users:user_list')
-
+    return redirect("users:user_list")
