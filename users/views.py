@@ -81,7 +81,13 @@ def email_verification(request, token):
 
 
 class UserProfileView(View):
-    """Вьюшка кабинета пользователя"""
+    """
+    Представление для отображения профиля текущего пользователя.
+    Показывает статистику по попыткам рассылки, созданным пользователем:
+    - общее количество попыток
+    - успешные попытки
+    - неудачные попытки
+    """
 
     def get(self, request):
         user = request.user
@@ -97,16 +103,20 @@ class UserProfileView(View):
 
 
 class UserLoginView(LoginView):
-    """Представление для входа пользователя в систему.
-    Использует стандартный LoginView Django с кастомным шаблоном.
+    """
+    Представление для аутентификации пользователя.
+    Использует стандартный Django LoginView с кастомным шаблоном входа.
+    После успешного входа перенаправляет пользователя в соответствии с настройками.
     """
 
     template_name = "users/login.html"
 
 
 class UserProfileEditView(LoginRequiredMixin, UpdateView):
-    """Представление для редактирования профиля пользователя.
-    Позволяет авторизованному пользователю изменить свои данные профиля.
+    """
+    Представление для редактирования профиля текущего пользователя.
+    Позволяет авторизованному пользователю обновлять свои данные через форму.
+    После сохранения перенаправляет на страницу профиля.
     """
 
     form_class = UserProfileForm
@@ -114,53 +124,83 @@ class UserProfileEditView(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy("users:profile")
 
     def get_object(self, queryset=None):
-        """Возвращает объект пользователя, который будет редактироваться.
-        В данном случае — всегда текущий аутентифицированный пользователь.
-        Args:
-            queryset (QuerySet, optional): Набор объектов. По умолчанию None.
-        Returns:
-            User: Объект текущего пользователя.
         """
-        return self.request.user  # редактируем только текущего пользователя
+        Возвращает объект пользователя для редактирования — всегда текущего пользователя.
+        Args:
+            queryset (QuerySet, optional): Набор объектов. Игнорируется.
+        Returns:
+            User: Текущий аутентифицированный пользователь.
+        """
+        return self.request.user
 
 
 class UserListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
-    """Просмотр списка пользователей + статистика по сообщениям, клиентам и рассылкам"""
+    """
+    Представление для отображения списка всех пользователей системы с общей статистикой.
+    Доступно только пользователям, обладающим всеми тремя разрешениями:
+        - 'mailservices.can_view_all_recipients'
+        - 'mailservices.can_view_all_messages'
+        - 'mailservices.can_view_all_mailings'
+    Отображает:
+        - список всех пользователей
+        - общее количество сообщений
+        - общее количество рассылок
+        - общее количество получателей
+
+    При отсутствии прав — возвращает 403 Forbidden.
+    """
+
     model = User
     template_name = "users/user_list.html"
     context_object_name = "users"
-
-    # 🔽 Правильно: флаг должен быть атрибутом класса
-    raise_exception = True
+    raise_exception = True  # Вместо перенаправления — показ ошибки 403
 
     def test_func(self):
-        """Разрешаем доступ только суперпользователю - для работы UserPassedTestMixin"""
+        """
+        Проверяет, обладает ли пользователь всеми необходимыми разрешениями.
+        Returns:
+            bool: True, если пользователь имеет все три разрешения, иначе False.
+        """
         perms_list = [
+            "mailservices.can_view_all_recipients",
             "mailservices.can_view_all_messages",
-            "mailservices.can_view_all_clients",
-            "mailservices.can_view_all_sendings",
+            "mailservices.can_view_all_mailings",  # ← ИСПРАВЛЕНО: было can_can_view_all_mailings
         ]
         return self.request.user.has_perms(perms_list)
 
     def get_queryset(self):
-        """Суперпользователь видит всех, остальные — пустой queryset (доступ запрещён через test_func)"""
-        return User.objects.all()  # будет вызвано только если test_func вернул True
+        """
+        Возвращает queryset всех пользователей.
+        Вызывается только если test_func() вернул True.
+        """
+        return User.objects.all()
 
     def get_context_data(self, **kwargs):
+        """
+        Добавляет в контекст статистику по сообщениям, рассылкам и получателям.
+        Returns:
+            dict: Расширенный контекст шаблона.
+        """
         context = super().get_context_data(**kwargs)
-
-        # Теперь безопасно: мы знаем, что пользователь — суперпользователь
-        context['messages_list'] = Message.objects.all()
-        context['sendings_list'] = Mailing.objects.all()
-        context['clients_list'] = Recipient.objects.all()
-        context['title'] = 'Админ-панель: Все данные'
-
+        context['message_list'] = Message.objects.all()
+        context['mailing_list'] = Mailing.objects.all()
+        context['recipient_list'] = Recipient.objects.all()
+        context['title'] = 'Панель администратора: Все данные'
         return context
+
 
 @login_required
 def toggle_user_active(request, pk):
-    """Блокировка пользователя админом или модератором"""
-
+    """
+    Переключает статус активности пользователя (блокировка/разблокировка).
+    Доступно только суперпользователям.
+    Защищено от самоблокировки.
+    Args:
+        request (HttpRequest): Объект запроса.
+        pk (int): Первичный ключ пользователя для блокировки/разблокировки.
+    Returns:
+        HttpResponseRedirect: Перенаправление на список пользователей с сообщением об успешном действии.
+    """
     if not request.user.is_superuser:
         return redirect('users:user_list')
 
@@ -171,16 +211,15 @@ def toggle_user_active(request, pk):
         messages.error(request, "Нельзя заблокировать самого себя!")
         return redirect('users:user_list')
 
-    #  Переключаем статус
+    # Переключаем статус
     user.is_active = not user.is_active
     user.save()
 
-    # 📢 Оповещение — что изменилось
+    # Оповещение — что изменилось
     if user.is_active:
         messages.success(request, f"Пользователь {user.username} разблокирован.")
     else:
         messages.warning(request, f"Пользователь {user.username} заблокирован.")
 
     return redirect('users:user_list')
-
 
