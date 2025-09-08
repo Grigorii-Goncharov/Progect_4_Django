@@ -3,10 +3,10 @@
 
 <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
     <div class="container">
-            <a class="navbar-brand" href="{% url 'mailservices:home' %}">
-                <img src="{% static '/images/logo.png' %}" alt="Логотип" height="40">
+        <a class="navbar-brand" href="{% url 'mailservices:home' %}">
+            <img src="{% static '/images/logo.png' %}" alt="Логотип" height="40">
 
-            </a>
+        </a>
 
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav me-auto">
@@ -19,35 +19,49 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'mailservices:recipient_list' %}">Получатели</a>
                 </li>
+                {% if user.is_authenticated %}
+                {% if perms.mailservices.can_view_all_messages %}
+                {% if perms.mailservices.can_view_all_mailings %}
+                {% if perms.mailservices.can_view_all_recipients %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'mailservices:recipient_list' %}">Пользователи</a>
+                </li>
+                {% endif %}
+                {% endif %}
+                {% endif %}
+                {% endif %}
             </ul>
 
             <!-- Авторизация -->
             <div class="d-flex">
-                    {% if user.is_authenticated %}
-                        <div class="dropdown">
-                            <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-user-circle"></i> {{ user.username }}
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="{% url 'users:profile' %}"><i class="fas fa-user me-2"></i> Профиль</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <!-- Форма для выхода вместо ссылки -->
-                                <li>
-                                    <form method="post" action="{% url 'users:logout' %}" class="m-0 p-0">
-                                        {% csrf_token %}
-                                        <button type="submit" class="dropdown-item text-danger">
-                                            <i class="fas fa-sign-out-alt me-2"></i> Выйти
-                                        </button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </div>
-                    {% else %}
-                        <a href="{% url 'users:login' %}" class="btn btn-outline-light btn-sm me-2">Вход</a>
-                        <a href="{% url 'users:register' %}" class="btn btn-light btn-sm">Регистрация</a>
-                    {% endif %}
+                {% if user.is_authenticated %}
+                <div class="dropdown">
+                    <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user-circle"></i> {{ user.username }}
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="{% url 'users:profile' %}"><i class="fas fa-user me-2"></i>
+                            Профиль</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <!-- Форма для выхода вместо ссылки -->
+                        <li>
+                            <form method="post" action="{% url 'users:logout' %}" class="m-0 p-0">
+                                {% csrf_token %}
+                                <button type="submit" class="dropdown-item text-danger">
+                                    <i class="fas fa-sign-out-alt me-2"></i> Выйти
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
                 </div>
+                {% else %}
+                <a href="{% url 'users:login' %}" class="btn btn-outline-light btn-sm me-2">Вход</a>
+                <a href="{% url 'users:register' %}" class="btn btn-light btn-sm">Регистрация</a>
+                {% endif %}
             </div>
         </div>
+    </div>
     </div>
 </nav>
