@@ -24,7 +24,7 @@
                 {% if perms.mailservices.can_view_all_mailings %}
                 {% if perms.mailservices.can_view_all_recipients %}
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'mailservices:recipient_list' %}">Пользователи</a>
+                    <a class="nav-link" href="{% url 'users:user_list' %}">Пользователи</a>
                 </li>
                 {% endif %}
                 {% endif %}

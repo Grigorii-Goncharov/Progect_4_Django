@@ -1,10 +1,12 @@
 from django.urls import path
+
+from . import views
 from .views import (
     UserRegisterView,
     UserLoginView,
     UserProfileEditView,
     UserProfileView,
-    email_verification,
+    email_verification, UserListView,
 )
 from django.contrib.auth.views import (
     PasswordResetCompleteView,
@@ -23,6 +25,9 @@ urlpatterns = [
     path("profile_edit/", UserProfileEditView.as_view(), name="profile_edit"),
     path("logout/", LogoutView.as_view(), name="logout"),
     path("email-confirm/<str:token>/", email_verification, name="email-confirm"),
+
+    path('users/', UserListView.as_view(), name='user_list'),
+    path('users/toggle/<int:pk>/', views.toggle_user_active, name='toggle_user_active'),
     # Сброс и восстановление пароля:
     path(
         "password-reset/",

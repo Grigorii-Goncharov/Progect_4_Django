@@ -1,16 +1,18 @@
 import secrets
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.views import LoginView
 from django.core.mail import send_mail
 from django.shortcuts import redirect, render, get_object_or_404
-from django.views.generic import CreateView, UpdateView
+from django.views.generic import CreateView, UpdateView, ListView
 from django.views import View
 from django.urls import reverse_lazy
 from config.settings import EMAIL_HOST_USER
-from mailservices.models import MailAttempt
+from mailservices.models import MailAttempt, Mailing
 from .forms import CustomUserCreationForm, UserProfileForm
 from .models import User
+from mailservices.models import Recipient, Message
 
 
 class UserRegisterView(CreateView):
@@ -120,3 +122,65 @@ class UserProfileEditView(LoginRequiredMixin, UpdateView):
             User: Объект текущего пользователя.
         """
         return self.request.user  # редактируем только текущего пользователя
+
+
+class UserListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    """Просмотр списка пользователей + статистика по сообщениям, клиентам и рассылкам"""
+    model = User
+    template_name = "users/user_list.html"
+    context_object_name = "users"
+
+    # 🔽 Правильно: флаг должен быть атрибутом класса
+    raise_exception = True
+
+    def test_func(self):
+        """Разрешаем доступ только суперпользователю - для работы UserPassedTestMixin"""
+        perms_list = [
+            "mailservices.can_view_all_messages",
+            "mailservices.can_view_all_clients",
+            "mailservices.can_view_all_sendings",
+        ]
+        return self.request.user.has_perms(perms_list)
+
+    def get_queryset(self):
+        """Суперпользователь видит всех, остальные — пустой queryset (доступ запрещён через test_func)"""
+        return User.objects.all()  # будет вызвано только если test_func вернул True
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Теперь безопасно: мы знаем, что пользователь — суперпользователь
+        context['messages_list'] = Message.objects.all()
+        context['sendings_list'] = Mailing.objects.all()
+        context['clients_list'] = Recipient.objects.all()
+        context['title'] = 'Админ-панель: Все данные'
+
+        return context
+
+@login_required
+def toggle_user_active(request, pk):
+    """Блокировка пользователя админом или модератором"""
+
+    if not request.user.is_superuser:
+        return redirect('users:user_list')
+
+    user = get_object_or_404(User, pk=pk)
+
+    # Защита от самоблокирования
+    if user.pk == request.user.pk:
+        messages.error(request, "Нельзя заблокировать самого себя!")
+        return redirect('users:user_list')
+
+    #  Переключаем статус
+    user.is_active = not user.is_active
+    user.save()
+
+    # 📢 Оповещение — что изменилось
+    if user.is_active:
+        messages.success(request, f"Пользователь {user.username} разблокирован.")
+    else:
+        messages.warning(request, f"Пользователь {user.username} заблокирован.")
+
+    return redirect('users:user_list')
+
+
