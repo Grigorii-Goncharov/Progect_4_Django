@@ -1,0 +1,54 @@
+{% extends "mailservices/base.html" %}
+{% include 'mailservices/includes/inc_menu.html' %}
+
+{% block title %}Профиль пользователя{% endblock %}
+
+{% block content %}
+
+<!-- Карточка профиля -->
+<div class="card mb-4">
+    <div class="card-body text-center">
+        <h3>Профиль пользователя {{ user.username }}</h3>
+        <p><strong>Почта:</strong> {{ user.email }}</p>
+        <p><strong>Никнейм:</strong> {{ user.username }}</p>
+        <p><strong>Номер телефона:</strong> {{ user.phone }}</p>
+
+        <a href="{% url 'users:profile_edit' %}" class="btn btn-warning">Редактировать Профиль</a>
+        <a href="{% url 'mailservices:attempt_list' %}" class="btn btn-info">История рассылок</a>
+    </div>
+</div>
+
+<!-- Статистика по попыткам рассылки -->
+<div class="row g-4 mb-5">
+    <!-- Всего попыток -->
+    <div class="col-md-4">
+        <div class="card text-white" style="background-color: #28a745;">
+            <div class="card-body">
+                <h5><i class="fas fa-envelope me-2"></i> Всего попыток</h5>
+                <p class="display-6 mb-0">{{ total_attempts }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Успешные попытки -->
+    <div class="col-md-4">
+        <div class="card text-white" style="background-color: #20c997;">
+            <div class="card-body">
+                <h5><i class="fas fa-check-circle me-2"></i> Успешные</h5>
+                <p class="display-6 mb-0">{{ successful_attempts }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Неудачные попытки -->
+    <div class="col-md-4">
+        <div class="card text-white" style="background-color: #d9534f;">
+            <div class="card-body">
+                <h5><i class="fas fa-times-circle me-2"></i> Ошибки</h5>
+                <p class="display-6 mb-0">{{ failed_attempts }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

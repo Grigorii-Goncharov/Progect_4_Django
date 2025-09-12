@@ -1,0 +1,64 @@
+<!-- templates/home.html -->
+
+{% extends "mailservices/base.html" %}
+
+{% block title %}Главная — Рассылка{% endblock %}
+
+{% block content %}
+{% load static %}
+<div class="text-center my-5">
+    <h1 class="display-5 fw-bold">Добро пожаловать!</h1>
+    <p class="lead text-muted">Статистика вашей системы email-рассылок</p>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <h5><i class="fas fa-envelope me-2"></i> Всего рассылок</h5>
+                <p class="display-6 mb-0">{{ total_mailings }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <h5><i class="fas fa-play-circle me-2"></i> Активных</h5>
+                <p class="display-6 mb-0">{{ active_mailings }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <h5><i class="fas fa-users me-2"></i> Получателей</h5>
+                <p class="display-6 mb-0">{{ unique_recipients }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="text-center">
+    <h3>НАШИ ПОСЫЛКИ - ВАШИ РАССЫЛКИ</h3>
+    <!--    <div class="btn-group" role="group">-->
+    <!--        <a href="{% url 'mailservices:recipient_list' %}" class="btn btn-outline-secondary">-->
+    <!--            <i class="fas fa-users"></i> Получатели-->
+    <!--        </a>-->
+    <!--        <a href="{% url 'mailservices:message_list' %}" class="btn btn-outline-secondary">-->
+    <!--            <i class="fas fa-comment"></i> Сообщения-->
+    <!--        </a>-->
+    <!--        <a href="#}" class="btn btn-outline-secondary">-->
+    <!--            <i class="fas fa-paper-plane"></i> Рассылки-->
+    <!--        </a>-->
+    <!--    </div>-->
+
+    <div class="text-center my-4">
+        <img src="{% static 'images/banner.jpg' %}"
+             alt="Наши посылки — ваши рассылки"
+             class="img-fluid rounded shadow"
+             style="max-height: 300px; object-fit: contain; transition: transform 0.3s ease;"
+             onmouseover="this.style.transform='scale(1.05)'"
+             onmouseout="this.style.transform='scale(1)'">
+    </div>
+</div>
+{% endblock %}
